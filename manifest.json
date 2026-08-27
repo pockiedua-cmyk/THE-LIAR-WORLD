@@ -1,0 +1,15 @@
+{
+  "name": "Veil of Lies",
+  "short_name": "Veil of Lies",
+  "description": "A detective RPG where lies believed by many can become reality. Your only weapon is evidence.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#0a0510",
+  "theme_color": "#0a0510",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

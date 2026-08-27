@@ -20,7 +20,7 @@ const ISO_MOVE=[
 ];
 
 function initPlayer(){
-  return{name:'Wanderer',x:12,y:18,dir:0,hp:100,mhp:100,mp:50,mmp:50,xp:0,mxp:100,lv:1,atk:10,def:8,spd:5,mag:6,lck:3,ins:5,gold:0,reg:'pro',map:'vil',inv:[],sk:['Attack','Defend','Heal','Magic Blast'],ev:[],sc:0,se:0,ss:0,bd:[],fq:{},flags:{},dlgS:{},npcM:{},unlocked:['pro'],endings:new Set()};
+  return{name:'Wanderer',x:12,y:18,dir:0,hp:100,mhp:100,mp:50,mmp:50,xp:0,mxp:100,lv:1,atk:10,def:8,spd:5,mag:6,lck:3,ins:5,gold:0,reg:'pro',map:'vil',inv:[],sk:['Attack','Defend','Heal','Magic Blast'],ev:[],sc:0,se:0,ss:0,bd:[],fq:{},flags:{},dlgS:{},npcM:{},unlocked:['pro'],endings:new Set(),gear:{wp:null,ar:null},ach:[],th:[],poison:0,stat:{kills:{},battles:0,deaths:0,evPick:0,buys:0,sells:0,pots:0,theories:0,steps:0,playMs:0}};
 }
 
 function mp(x,y){const m=getMap();if(!m||y<0||y>=m.map.length||x<0||x>=m.map[0].length)return 3;return parseInt(m.map[y][x])||0;}
@@ -37,12 +37,15 @@ function addEv(id,title,desc,src,type){
   ST.p.ev.push({id,title,desc,src,type:type||'physical',ts:Date.now()});
   notify('Evidence: '+title);
   ST.p.sc+=5;
+  ST.p.stat.evPick=(ST.p.stat.evPick||0)+1;
+  Snd.evi();checkAch();
 }
 
 function addItem(it){
   const ex=ST.p.inv.find(i=>i.id===it.id);
   if(ex){ex.qty=(ex.qty||1)+1;}else{ST.p.inv.push({...it,qty:1});}
-  notify('Obtained: '+it.name);
+  notify('Obtained: '+(it.nm||it.name));
+  Snd.pickup();
 }
 
 function gxp(amt){
@@ -55,8 +58,11 @@ function gxp(amt){
     ST.p.atk+=2;ST.p.def+=1;ST.p.spd+=1;ST.p.mag+=2;ST.p.ins+=1;
     ST.p.hp=ST.p.mhp;ST.p.mp=ST.p.mmp;
     notify('Level Up! Now Lv.'+ST.p.lv);
+    Snd.lv();
+    if(typeof lvFlash==='function')lvFlash();
   }
   uHUD();
+  if(typeof checkAch==='function')checkAch();
 }
 
 function uHUD(){
@@ -75,8 +81,23 @@ function uHUD(){
   document.getElementById('sL').textContent=p.lck;
   document.getElementById('sI').textContent=p.ins;
   document.getElementById('sG').textContent=p.gold;
+  const gW=document.getElementById('sWp');
+  if(gW)gW.textContent=(p.gear&&p.gear.wp)?p.gear.wp.nm+' (+'+((ITEM_DEFS[p.gear.wp.id]&&ITEM_DEFS[p.gear.wp.id].wp)||0)+')':'None';
+  const gA=document.getElementById('sAr');
+  if(gA)gA.textContent=(p.gear&&p.gear.ar)?p.gear.ar.nm+' (+'+((ITEM_DEFS[p.gear.ar.id]&&ITEM_DEFS[p.gear.ar.id].df)||0)+')':'None';
   const m=getMap();
   document.getElementById('ln').textContent=m?m.name:'Unknown';
+  const obj=document.getElementById('obj');
+  if(obj){
+    const act=Object.entries(p.fq||{}).find(([,q])=>q.st==='active');
+    if(act){
+      let loc='';
+      const t=typeof waypointTarget==='function'?waypointTarget(m):null;
+      if(t)loc=' \u25C6';else if(act[1].giver)loc=' \u2192 '+act[1].giver.replace(/_/g,' ');
+      obj.textContent='\u25B8 '+act[1].name+loc;
+      obj.style.display='block';
+    }else obj.style.display='none';
+  }
 }
 
 function notify(t){
@@ -98,18 +119,28 @@ function showBanner(t,s){
   setTimeout(()=>{b.style.display='none';},4500);
 }
 
-function startQ(id,name,desc){
-  if(!ST.p.fq[id]){ST.p.fq[id]={name,desc,st:'active'};notify('Quest: '+name);}
+function startQ(id,name,desc,opts){
+  if(!ST.p.fq[id]){
+    ST.p.fq[id]={name,desc,st:'active'};
+    if(ST.dlgNPC)ST.p.fq[id].giver=ST.dlgNPC;
+    if(opts&&opts.tgt)ST.p.fq[id].tgt=opts.tgt;
+    notify('Quest: '+name);
+    Snd.hud();
+  }
 }
-function completeQ(id){if(ST.p.fq[id]){ST.p.fq[id].st='done';notify('Complete: '+ST.p.fq[id].name);}}
+function completeQ(id){if(ST.p.fq[id]){ST.p.fq[id].st='done';notify('Complete: '+ST.p.fq[id].name);Snd.ach();if(typeof checkAch==='function')checkAch();}}
 function failQ(id){if(ST.p.fq[id])ST.p.fq[id].st='failed';}
 
 function teleport(reg,map,x,y){
   ST.p.reg=reg;ST.p.map=map;ST.p.x=x;ST.p.y=y;
   ST.renderPX=x;ST.renderPY=y;
+  ST.checkpoint={reg:reg,map:map,x:x,y:y};
+  ST.p.poison=0;
   R3D.setRegion(reg);
   R3D.buildMap(null,reg+'_'+map);
   R3D.resetCamSnap();
+  if(typeof Snd!=='undefined')Snd.setRegion(reg);
+  if(typeof checkAch==='function')checkAch();
   uHUD();
 }
 
@@ -132,6 +163,28 @@ function updateCombatFx(dt){
     f.life-=dt/1000;f.y+=f.vy;
     if(f.life<=0)ST.combatFx.splice(i,1);
   }
+}
+
+function combatFlash(){
+  const c=document.getElementById('cm');
+  if(c){c.classList.remove('cfl');void c.offsetWidth;c.classList.add('cfl');}
+}
+function enemyFlash(){
+  const s=document.getElementById('cmS');
+  if(s){
+    s.style.filter='sepia(1) hue-rotate(-50deg) saturate(6) brightness(1.25)';
+    clearTimeout(s._ft);
+    s._ft=setTimeout(()=>{s.style.filter='';},260);
+  }
+}
+function playerHurtFx(){
+  const el=document.getElementById('dmgV');
+  if(el){el.classList.remove('dv');void el.offsetWidth;el.classList.add('dv');}
+}
+function lvFlash(){
+  document.body.classList.remove('lvf');void document.body.offsetWidth;
+  document.body.classList.add('lvf');
+  setTimeout(()=>document.body.classList.remove('lvf'),900);
 }
 
 const REGION_PARTICLES={
@@ -159,8 +212,15 @@ const LoginUI = {
     document.getElementById('loginSubmit').textContent = mode === 'login' ? 'LOGIN' : 'REGISTER';
     document.getElementById('loginPass2').style.display = mode === 'register' ? 'block' : 'none';
     document.getElementById('loginErr').textContent = '';
+    document.getElementById('loginErr').style.color = '';
     document.getElementById('loginPass').value = '';
     document.getElementById('loginPass2').value = '';
+  },
+
+  setErr(msg) {
+    const el = document.getElementById('loginErr');
+    el.style.color = '';
+    el.textContent = msg;
   },
 
   getUsers() {
@@ -178,15 +238,15 @@ const LoginUI = {
     const errEl = document.getElementById('loginErr');
 
     if (!user || user.length < 2) {
-      errEl.textContent = 'Username must be at least 2 characters.';
+      this.setErr('Username must be at least 2 characters.');
       return;
     }
     if (!pass || pass.length < 3) {
-      errEl.textContent = 'Password must be at least 3 characters.';
+      this.setErr('Password must be at least 3 characters.');
       return;
     }
     if (user.toLowerCase() === 'guest') {
-      errEl.textContent = 'Username "guest" is reserved.';
+      this.setErr('Username "guest" is reserved.');
       return;
     }
 
@@ -195,11 +255,11 @@ const LoginUI = {
     if (this.mode === 'register') {
       const pass2 = document.getElementById('loginPass2').value;
       if (pass !== pass2) {
-        errEl.textContent = 'Passwords do not match.';
+        this.setErr('Passwords do not match.');
         return;
       }
       if (users[user]) {
-        errEl.textContent = 'Username already taken.';
+        this.setErr('Username already taken.');
         return;
       }
       users[user] = { pass: pass, created: Date.now() };
@@ -209,11 +269,11 @@ const LoginUI = {
       setTimeout(() => this.loginAs(user), 800);
     } else {
       if (!users[user]) {
-        errEl.textContent = 'Account not found.';
+        this.setErr('Account not found.');
         return;
       }
       if (users[user].pass !== pass) {
-        errEl.textContent = 'Wrong password.';
+        this.setErr('Wrong password.');
         return;
       }
       this.loginAs(user);
@@ -284,6 +344,7 @@ const LoginUI = {
 const G = {
 startNewGame(){
   ST.p = initPlayer();
+  if(typeof initFeats==='function')initFeats();
   const nm = document.getElementById('nameInput').value.trim();
   if(nm) ST.p.name = nm;
   document.getElementById('titleScreen').style.display='none';
@@ -293,6 +354,10 @@ startNewGame(){
   teleport('pro','vil',12,18);
   showBanner('PROLOGUE','THE BOY WITHOUT HISTORY');
   setTimeout(()=>notify('A stranger wakes up with no memory...'),3500);
+  if(!localStorage.getItem('tlw_seenHelp')){
+    localStorage.setItem('tlw_seenHelp','1');
+    setTimeout(()=>UI.openHelp(),1600);
+  }
 },
 loadGame(){
   const s=localStorage.getItem(LoginUI.getSaveKey());
@@ -301,6 +366,7 @@ loadGame(){
     const d=JSON.parse(s);
     ST.p=Object.assign(initPlayer(),d.p);
     ST.p.endings=new Set(d.endings||[]);
+    if(typeof initFeats==='function')initFeats();
     document.getElementById('titleScreen').style.display='none';
     showUI(true);
     ST.phase='explore';
@@ -323,7 +389,7 @@ returnToTitle(){
   document.getElementById('loginScreen').style.display='none';
   document.getElementById('userInfo').style.display='none';
   showUI(false);
-  ['mn','cm','dlg','ev','inv','ql','rk','es'].forEach(id=>{document.getElementById(id).style.display='none';});
+  ['mn','cm','dlg','ev','inv','ql','rk','hp','es','sh','ft'].forEach(id=>{document.getElementById(id).style.display='none';});
   if(LoginUI.currentUser){
     document.getElementById('titleScreen').style.display='flex';
     document.getElementById('userInfo').style.display='block';
@@ -338,6 +404,7 @@ newGamePlus(){
   ST.p=initPlayer();
   ST.p.name=name;ST.p._ngc=cnt;
   ST.p.endings=new Set(ends);
+  if(typeof initFeats==='function')initFeats();
   ST.p.lv+=cnt*5;ST.p.atk+=cnt*5;ST.p.def+=cnt*3;
   ST.p.mag+=cnt*3;ST.p.mhp+=cnt*50;ST.p.mmp+=cnt*25;
   ST.p.hp=ST.p.mhp;ST.p.mp=ST.p.mmp;ST.p.ins+=cnt*2;
@@ -355,11 +422,14 @@ triggerEnding(id,title,type,txt){
   document.getElementById('eTy').textContent=type;
   document.getElementById('eTx').innerHTML=txt;
   document.getElementById('ngBtn').style.display='block';
+  if(typeof checkAch==='function')checkAch();
 }
 };
 
 function showUI(show){
-  ['hud','sp','ctl','mm','cmp'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display=show?'block':'none';});
+  ['hud','sp','mm','cmp'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display=show?'block':'none';});
+  const tc=document.getElementById('tc');if(tc)tc.style.display=show?'':'none';
+  const ctl=document.getElementById('ctl');if(ctl)ctl.style.display=show?'':'none';
 }
 
 function renderRanking(cat){
@@ -373,22 +443,24 @@ function renderRanking(cat){
     b.textContent=c.l;b.onclick=()=>renderRanking(c.id);tabs.appendChild(b);
   });
   tbl.innerHTML='';
-  const names=['ShadowSeeker','TruthWalker','LieHunter','FactBreaker','RealityMage','VoidGazer',
-    'ProofMaster','DarkScholar','LightBringer','SilentJudge','DeepThinker','FateReader',
-    'DoubtKing','ClueMaster','WisdomHunter','MysticEye','GhostTalker','SecretKeeper','MindReader','WarTeller'];
-  let entries=names.map(nm=>({nm,s:Math.floor(Math.random()*500)+50,p:false}));
-  const ps={truth:ST.p?ST.p.sc:0,cases:ST.p?ST.p.ss:0,level:ST.p?ST.p.lv:1,
-    insight:ST.p?ST.p.ins:5,bosses:ST.p?(ST.p.bd||[]).length:0,
-    artifacts:ST.p?ST.p.ev.length:0};
-  entries.push({nm:ST.p?ST.p.name:'Wanderer',s:ps[cat]||0,p:true});
-  entries.sort((a,b)=>b.s-a.s);
-  const medals=['🥇','🥈','🥉'];
-  entries.forEach((e,i)=>{
+  const statMap={truth:'Truth Score',cases:'Cases Solved',level:'World Level',insight:'Insight',bosses:'Secret Boss',artifacts:'Artifacts'};
+  const p=ST.p;
+  if(p){
+    const val={truth:p.sc,cases:p.ss,level:p.lv,insight:p.ins,bosses:(p.bd||[]).length,artifacts:p.ev.length};
     const r=document.createElement('div');
-    r.className='rr'+(e.p?' pr':'');
-    r.innerHTML=`<span class="rp">${i<3?medals[i]:'#'+(i+1)}</span><span class="rna">${e.nm}</span><span class="rs">${e.s}</span>`;
+    r.className='rr pr';
+    r.innerHTML=`<span class="rp">&#9733;</span><span class="rna">${p.name||'Wanderer'}</span><span class="rs">${val[cat]||0}</span>`;
     tbl.appendChild(r);
-  });
+    const note=document.createElement('div');
+    note.className='ei';
+    note.innerHTML='<div class="ed" style="color:#6a6a8a">'+(cat==='truth'?'Your Truth Score reflects evidence collected and cases solved.':'Your '+statMap[cat]+'.')+' Online global ranking coming soon &#8212; worldwide leaderboards will appear here once the server is connected.</div>';
+    tbl.appendChild(note);
+  } else {
+    const note=document.createElement('div');
+    note.className='ei';
+    note.innerHTML='<div class="ed" style="color:#6a6a8a">No save data found. Start a journey to see your ranking stats.</div>';
+    tbl.appendChild(note);
+  }
 }
 
 const UI = {
@@ -398,8 +470,10 @@ openInv(){document.getElementById('inv').style.display='block';renderInv();},
 closeInv(){document.getElementById('inv').style.display='none';},
 openQl(){document.getElementById('ql').style.display='block';renderQL();},
 closeQl(){document.getElementById('ql').style.display='none';},
-openMn(){document.getElementById('mn').style.display='flex';},
+openMn(){document.getElementById('mn').style.display='flex';const sb=document.getElementById('sndBtn');if(sb&&typeof Snd!=='undefined'){sb.textContent='SOUND: '+(Snd.isMuted()?'OFF':'ON');}},
 closeMn(){document.getElementById('mn').style.display='none';},
+openHelp(){document.getElementById('hp').style.display='block';},
+closeHelp(){document.getElementById('hp').style.display='none';},
 closeRk(){document.getElementById('rk').style.display='none';}
 };
 G.ui=UI;
@@ -411,12 +485,18 @@ function renderEvBoard(){
   });
   (ST.p.ev||[]).forEach(e=>{
     const el=document.createElement('div');el.className='ei';
+    el.dataset.id=e.id;
     el.innerHTML=`<div class="et">${e.t||e.title}</div><div class="ed">${e.d||e.desc}</div><div class="es">Source: ${e.s||e.src}</div>`;
     el.onclick=()=>el.classList.toggle('sel');
     const cols={npc:'evN',physical:'evP',document:'evD',combat:'evP',boss:'evP'};
     document.getElementById(cols[e.type]||'evP').appendChild(el);
   });
   const tc=document.getElementById('evT');
+  (ST.p.th||[]).forEach(t=>{
+    const el=document.createElement('div');el.className='ei';
+    el.innerHTML=`<div class="et">${t.t}</div><div class="ed">${t.d}</div>`;
+    tc.appendChild(el);
+  });
   Object.entries(ST.p.flags||{}).filter(([k])=>k.startsWith('theory_')).forEach(([k,v])=>{
     const el=document.createElement('div');el.className='ei';
     el.innerHTML=`<div class="et">${k.replace('theory_','').replace(/_/g,' ')}</div><div class="ed">${v}</div>`;
@@ -427,6 +507,11 @@ function renderEvBoard(){
     el.innerHTML='<div class="et" style="color:#6a6a8a">No evidence collected yet. Explore the world and investigate objects.</div>';
     document.getElementById('evP').appendChild(el);
   }
+  if(tc.children.length<=1&&!(ST.p.th||[]).length){
+    const el=document.createElement('div');el.className='ei';
+    el.innerHTML='<div class="ed" style="color:#6a6a8a">Select 2 evidence cards and press FORM THEORY.</div>';
+    tc.appendChild(el);
+  }
 }
 
 function renderInv(){
@@ -436,10 +521,31 @@ function renderInv(){
     if(ST.p.inv[i]){
       const it=ST.p.inv[i];
       s.innerHTML=`<span>${it.icon}</span><span class="in">${it.nm||it.name}</span>${(it.qty||1)>1?'<span class="iq">x'+it.qty+'</span>':''}`;
-      s.title=it.desc||'';
+      s.title=(it.desc||'')+(it.eq?' (Click to equip)':' (Click to use)');
+      s.classList.add('is-use');
+      s.onclick=()=>useItem(i);
+    } else {
+      s.classList.add('is-empty');
     }
     g.appendChild(s);
   }
+}
+
+function useItem(i){
+  const it=ST.p.inv[i];if(!it)return;
+  const nm=it.nm||it.name;
+  if(it.eq){
+    equipItem(i);
+    return;
+  }
+  if(typeof useConsumable==='function'&&useConsumable(it)){
+    it.qty=(it.qty||1)-1;
+    if(it.qty<=0)ST.p.inv.splice(i,1);
+    uHUD();
+    renderInv();
+    return;
+  }
+  notify(nm+' cannot be used right now.');
 }
 
 function renderQL(){
@@ -449,7 +555,7 @@ function renderQL(){
   qs.forEach(([id,q])=>{
     const el=document.createElement('div');el.className='qi';
     const sc=q.st==='done'?'qc':q.st==='failed'?'qf':'qa';
-    el.innerHTML=`<div class="qn">${q.name}</div><div class="qd">${q.desc}</div><div class="qs ${sc}">${q.st.toUpperCase()}</div>`;
+    el.innerHTML=`<div class="qn">${q.name}</div><div class="qd">${q.desc}</div>`+((q.tgt)?`<div class="qd" style="color:#8a6aff">Objective: ${q.tgt.t||'Reach the marked location'}</div>`:'')+((q.giver&&q.st==='active')?`<div class="qd" style="color:#8a6aff">Return to the quest giver for guidance.</div>`:'')+`<div class="qs ${sc}">${q.st.toUpperCase()}</div>`;
     l.appendChild(el);
   });
 }
@@ -459,7 +565,18 @@ function openDlg(npcId,text,choices){
   ST.dlgNPC=npcId;
   document.getElementById('dlg').style.display='flex';
   document.getElementById('dS').textContent=getNPCName(npcId);
-  document.getElementById('dT').textContent=text;
+  Snd.talk();
+  const dtEl=document.getElementById('dT');
+  if(ST._twT){clearInterval(ST._twT);ST._twT=null;}
+  dtEl.textContent='';
+  const full=text||'';
+  let ti=0;
+  ST._twT=setInterval(function(){
+    ti+=2;
+    dtEl.textContent=full.slice(0,ti);
+    if(ti>=full.length){clearInterval(ST._twT);ST._twT=null;}
+  },24);
+  dtEl.onclick=function(){if(ST._twT){clearInterval(ST._twT);ST._twT=null;}dtEl.textContent=full;};
   const pc=document.getElementById('dP');const pctx=pc.getContext('2d');
   pctx.clearRect(0,0,64,64);
   const sType=NPC_SPRITE[npcId]||NPC_SPRITE[Object.keys(NPC_SPRITE).find(k=>npcId.startsWith(k))]||'player';
@@ -476,7 +593,7 @@ function openDlg(npcId,text,choices){
       if((ch.ev&&!hasEv(ch.ev))||(ch.req&&!ST.p.flags[ch.req]))b.classList.add('lk');
       else b.onclick=()=>{
         if(ch.ev)addEv(ch.ev,ch.ev.replace(/_/g,' '),ch.desc||'Evidence collected.',getNPCName(npcId),'npc');
-        if(ch.start)startQ(ch.start,ch.start.replace(/_/g,' '),'Investigate further.');
+        if(ch.start)startQ(ch.start,ch.start.replace(/_/g,' '),'Investigate further.',ch.tgt?{tgt:ch.tgt}:null);
         if(ch.end){closeDlg();return;}
         if(ch.next!==undefined&&DLG[npcId]&&DLG[npcId][ch.next]){
           const nd=DLG[npcId][ch.next];
@@ -499,6 +616,7 @@ function closeDlg(){
   ST.phase='explore';
   document.getElementById('dlg').style.display='none';
   ST.dlgNPC=null;
+  if(ST._twT){clearInterval(ST._twT);ST._twT=null;}
   const pc=document.getElementById('dP');if(pc)pc.getContext('2d').clearRect(0,0,64,64);
 }
 
@@ -513,6 +631,10 @@ function interact(){
   const ny=ST.p.y+[[0,-1],[1,0],[0,1],[-1,0]][ST.p.dir][1];
   const npc=getNPC(nx,ny);
   if(npc){
+    if(typeof SHOPS!=='undefined'&&SHOPS[npc.id]&&typeof UI.openShop==='function'){
+      UI.openShop(npc.id);
+      return;
+    }
     const dlg=DLG[npc.id];
     if(dlg&&dlg[0]){
       if(npc.id==='ghost'&&ST.p.ins<8){
@@ -602,8 +724,11 @@ function interact(){
 
 function startCombat(enemy){
   ST.phase='combat';
-  const e={...enemy,curHp:enemy.hp};
+  const e={...enemy,curHp:enemy.hp,pois:(enemy.pz||0)};
   ST.cs={e,log:[],pTurn:ST.p.spd>=e.sp2,defending:false,turns:0};
+  if(!ST.p.stat)ST.p.stat={kills:{},battles:0,deaths:0,evPick:0,buys:0,sells:0,pots:0,theories:0,steps:0,playMs:0};
+  ST.p.stat.battles=(ST.p.stat.battles||0)+1;
+  Snd.battle();
   document.getElementById('cm').style.display='block';
   const spEl=document.getElementById('cmS');
   const eSprKey=ENEMY_SPRITE_MAP[e.nm]||e.nm.toLowerCase().replace(/\s+/g,'');
@@ -623,8 +748,14 @@ function updateCombat(){
   document.getElementById('cmL').scrollTop=99999;
   const a=document.getElementById('cmA');a.innerHTML='';
   if(cs.pTurn){
+    const mpCost={'Magic Blast':10,'Heal':12};
     ST.p.sk.forEach(s=>{
-      const b=document.createElement('button');b.className='btn btn-sm';b.textContent=s;
+      const b=document.createElement('button');b.className='btn btn-sm';
+      const cost=mpCost[s]||0;
+      if(cost>0){
+        if(ST.p.mp<cost){b.disabled=true;}
+        b.textContent=s+' ('+cost+' MP)';
+      } else b.textContent=s;
       b.onclick=()=>pAction(s);a.appendChild(b);
     });
     if(ST.p.mp>=15){
@@ -632,21 +763,88 @@ function updateCombat(){
       b.textContent='Eye of Truth (15MP)';b.style.borderColor='#aa6aff';
       b.onclick=()=>pAction('Eye of Truth');a.appendChild(b);
     }
+    const fb=document.createElement('button');fb.className='btn btn-sm';fb.style.borderColor='#7a7a9a';
+    fb.textContent='FLIGHT';fb.title='Attempt to flee.';
+    fb.onclick=()=>flightAttempt();a.appendChild(fb);
   } else {
     const b=document.createElement('button');b.className='btn btn-sm';b.textContent='Enemy turn...';b.disabled=true;
     a.appendChild(b);
   }
 }
 
+function flightAttempt(){
+  const cs=ST.cs;if(!cs||!cs.pTurn)return;
+  const p=ST.p;
+  let chance=55+p.spd*3;
+  if(Math.random()*100<chance){
+    cs.log.push({t:'You escaped.',c:'nf'});
+    Snd.flee();
+    updateCombat();
+    setTimeout(()=>{
+      document.getElementById('cm').style.display='none';
+      ST.phase='explore';ST.cs=null;
+    },600);
+  } else {
+    cs.log.push({t:'Could not escape!',c:'dm'});
+    cs.pTurn=false;
+    updateCombat();
+    setTimeout(eTurn,700);
+  }
+}
+
+function poisonTick(){
+  const cs=ST.cs;if(!cs)return;
+  const p=ST.p;
+  if(p.poison>0){
+    const t=4+Math.floor(Math.random()*3);
+    p.hp-=t;
+    cs.log.push({t:'You take '+t+' poison damage.',c:'dm'});
+    addCombatFx('-'+t,'#66ff66',window.innerWidth/2-30,window.innerHeight*0.6);
+    p.poison--;
+    playerHurtFx();
+    uHUD();
+    return true;
+  }
+  return false;
+}
+
+function handleCombatFall(){
+  const cs=ST.cs;if(!cs)return;
+  cs.fallen=true;
+  const p=ST.p;
+  p.hp=0;
+  cs.log.push({t:'You have fallen...',c:'dm'});
+  updateCombat();
+  setTimeout(()=>{
+    document.getElementById('cm').style.display='none';
+    p.hp=Math.floor(p.mhp*0.3);p.mp=Math.floor(p.mmp*0.5);
+    ST.phase='explore';ST.cs=null;
+    const fee=Math.floor((ST.p.gold||0)*0.25);
+    ST.p.gold=Math.max(0,(ST.p.gold||0)-fee);
+    ST.p.stat.deaths=(ST.p.stat.deaths||0)+1;
+    if(ST.checkpoint)teleport(ST.checkpoint.reg,ST.checkpoint.map,ST.checkpoint.x,ST.checkpoint.y);
+    notify(fee>0?('You barely survived. Lost '+fee+' gold.'):'You barely survived.');
+    Snd.lose();
+    playerHurtFx();
+    uHUD();
+    if(typeof checkAch==='function')checkAch();
+  },1200);
+}
+
 function pAction(sk){
   const cs=ST.cs;if(!cs||!cs.pTurn)return;
+  if(cs.fallen)return;
   const p=ST.p,e=cs.e;
+  if(poisonTick()===true&&p.hp<=0){
+    handleCombatFall();return;
+  }
   let dmg=0;
   if(sk==='Attack'){
     dmg=Math.max(1,p.atk+Math.floor(Math.random()*5)-e.df/2|0);
     e.curHp-=dmg;
     cs.log.push({t:`You attack for ${dmg} damage!`,c:'dm'});
     addCombatFx('-'+dmg,'#ff6644',window.innerWidth/2+30,window.innerHeight*0.28);ST.attackFlash=200;triggerShake(4);
+    enemyFlash();combatFlash();Snd.hit();
   } else if(sk==='Magic Blast'){
     if(p.mp<10){cs.log.push({t:'Not enough MP!',c:'nf'});updateCombat();return;}
     p.mp-=10;
@@ -654,9 +852,11 @@ function pAction(sk){
     e.curHp-=dmg;
     cs.log.push({t:`Magic Blast hits for ${dmg}!`,c:'dm'});
     addCombatFx('-'+dmg,'#66aaff',window.innerWidth/2+30,window.innerHeight*0.28);ST.attackFlash=300;triggerShake(6);
+    enemyFlash();combatFlash();Snd.cast();
   } else if(sk==='Defend'){
     cs.defending=true;
     cs.log.push({t:'You brace yourself.',c:'nf'});
+    Snd.hud();
   } else if(sk==='Heal'){
     if(p.mp<12){cs.log.push({t:'Not enough MP!',c:'nf'});updateCombat();return;}
     p.mp-=12;
@@ -664,6 +864,7 @@ function pAction(sk){
     p.hp=Math.min(p.mhp,p.hp+h);
     cs.log.push({t:`Healed ${h} HP.`,c:'hl'});
     addCombatFx('+'+h,'#44ff66',window.innerWidth/2-30,window.innerHeight*0.6);
+    Snd.heal();
   } else if(sk==='Eye of Truth'){
     if(p.mp<15){cs.log.push({t:'Not enough MP!',c:'nf'});updateCombat();return;}
     p.mp-=15;
@@ -671,11 +872,13 @@ function pAction(sk){
       e.curHp=0;
       cs.log.push({t:'Eye of Truth reveals the weakness! '+e.nm+' is devastated!',c:'nf'});
       document.getElementById('eo').style.display='block';
+      Snd.eye();combatFlash();
       setTimeout(()=>{document.getElementById('eo').style.display='none';},1000);
     } else {
       dmg=5;e.curHp-=dmg;
       cs.log.push({t:'Eye of Truth reveals minor detail. '+dmg+' damage.',c:'nf'});
       addCombatFx('-'+dmg,'#cc66ff',window.innerWidth/2+30,window.innerHeight*0.28);triggerShake(3);
+      enemyFlash();Snd.eye();
     }
   }
   uHUD();
@@ -685,11 +888,15 @@ function pAction(sk){
     setTimeout(()=>{
       document.getElementById('cm').style.display='none';
       ST.phase='explore';ST.cs=null;
+      Snd.win();
       gxp(e.xp||20);
       if(e.gld){ST.p.gold+=e.gld;notify('+'+e.gld+' gold');}
+      if(e.pz&&Math.random()<0.12){addItem({id:'hpotion',nm:'Health Potion',icon:'\u25A6',desc:'Restores 30 HP'});}
       if(e.ev&&e.ev.id){addEv(e.ev.id,e.ev.t,e.ev.d,e.ev.s,e.ev.type||'physical');}
       if(e.boss){ST.p.bd.push(e.nm);notify('Boss Defeated: '+e.nm);}
       ST.p.bd=[...new Set(ST.p.bd||[])];
+      ST.p.stat.kills[e.nm]=(ST.p.stat.kills[e.nm]||0)+1;
+      if(typeof checkAch==='function')checkAch();
     },1000);
     return;
   }
@@ -705,20 +912,18 @@ function eTurn(){
   const at=atks[Math.floor(Math.random()*atks.length)];
   let dmg=Math.max(1,(at.pw||e.at)+Math.floor(Math.random()*4)-(cs.defending?p.def*2:p.def)/2|0);
   if(at.mg)dmg=Math.max(1,(at.pw||e.at)+Math.floor(Math.random()*4)-p.def/3|0);
+  if(e.stun)dmg*=e.stun;
   p.hp-=dmg;
   cs.log.push({t:e.nm+' uses '+at.nm+' for '+dmg+'!',c:'dm'});
   addCombatFx('-'+dmg,'#ff4444',window.innerWidth/2-30,window.innerHeight*0.6);triggerShake(3);
+  Snd.hurt();playerHurtFx();
+  if(e.pz&&Math.random()*100<e.pz){
+    p.poison=Math.min(5,(p.poison||0)+2);
+    cs.log.push({t:'You have been poisoned!',c:'dm'});
+  }
   cs.defending=false;
   if(p.hp<=0){
-    p.hp=0;cs.log.push({t:'You have fallen...',c:'dm'});
-    updateCombat();
-    setTimeout(()=>{
-      document.getElementById('cm').style.display='none';
-      p.hp=Math.floor(p.mhp*0.3);p.mp=Math.floor(p.mmp*0.5);
-      ST.phase='explore';ST.cs=null;
-      notify('You barely survived.');
-      uHUD();
-    },1200);
+    handleCombatFall();
     return;
   }
   cs.pTurn=true;cs.turns++;
@@ -806,6 +1011,7 @@ function renderMinimap(m){
   });
   mmx.fillStyle='#4488ff';const ps=gridToScreen(ST.p.x,ST.p.y);
   mmx.fillRect(ox+ps.x*sc-1,oy+ps.y*sc-1,4,4);
+  if(typeof drawMinimapObjective==='function')drawMinimapObjective(sc,ox,oy);
 }
 
 function update(){
@@ -823,6 +1029,7 @@ function update(){
     return;
   }
   if(ST.phase!=='explore')return;
+  if(isPanelOpen()){ST.isMoving=false;return;}
   if(!ST._camUnwrap)ST._camUnwrap=0;
   if(ST.keys['z']&&!ST._zdown){ST._camFrom=ST.camAngle;ST._camUnwrap--;ST.camAngleTarget=ST._camUnwrap;ST.camLerp=0;ST._zdown=true;}
   if(ST.keys['c']&&!ST._cdown){ST._camFrom=ST.camAngle;ST._camUnwrap++;ST.camAngleTarget=ST._camUnwrap;ST.camLerp=0;ST._cdown=true;}
@@ -873,7 +1080,10 @@ function update(){
           teleport(conn.r,conn.m,conn.tx,conn.ty);
           notify((getMap()||{}).name||'New Area');
         });
+        if(typeof checkAch==='function')checkAch();
       }
+      if(!ST.p.stat)ST.p.stat={kills:{},battles:0,deaths:0,evPick:0,buys:0,sells:0,pots:0,theories:0,steps:0,playMs:0};
+      ST.p.stat.steps=(ST.p.stat.steps||0)+1;
       if(Math.random()<0.08&&p.lv>1){
         const m=getMap();
         if(m&&m.re&&m.re.length){
@@ -906,27 +1116,41 @@ function update(){
   ST.renderPY+=(p.y-ST.renderPY)*Math.min(1,lerpSpeed*14);
 }
 
+function isPanelOpen(){
+  return ['mn','ev','inv','ql','rk','hp','sh','ft'].some(id=>{
+    const el=document.getElementById(id);
+    return el&&(el.style.display==='flex'||el.style.display==='block');
+  });
+}
+
 document.addEventListener('keydown',e=>{
   const k=e.key.toLowerCase();
   ST.keys[k]=true;
   if(k==='e'){
-    if(ST.phase==='explore')interact();
+    if(ST.phase==='explore'&&!isPanelOpen())interact();
     else if(ST.phase==='dialogue')return;
   }
   if(k==='escape'){
     e.preventDefault();
     if(ST.phase==='dialogue')closeDlg();
-    else if(ST.phase==='explore')UI.openMn();
-    else if(document.getElementById('mn').style.display==='flex')UI.closeMn();
+    else if(document.getElementById('sh').style.display==='block')UI.closeShop();
+    else if(document.getElementById('ft').style.display==='block')UI.closeFeats();
+    else if(document.getElementById('rk').style.display==='block')UI.closeRk();
     else if(document.getElementById('ev').style.display==='block')UI.closeEv();
     else if(document.getElementById('inv').style.display==='block')UI.closeInv();
     else if(document.getElementById('ql').style.display==='block')UI.closeQl();
-    else if(document.getElementById('rk').style.display==='block')UI.closeRk();
+    else if(document.getElementById('hp').style.display==='block')UI.closeHelp();
+    else if(document.getElementById('mn').style.display==='flex')UI.closeMn();
+    else if(ST.phase==='explore')UI.openMn();
   }
-  if(k==='i'&&ST.phase==='explore')UI.openInv();
-  if(k==='q'&&ST.phase==='explore')UI.openQl();
-  if(k==='v'&&ST.phase==='explore')UI.openEv();
-  if(k===' '&&ST.phase==='explore'){
+  if(k==='m'&&ST.phase==='explore'&&!isPanelOpen()){
+    const muted=typeof UI.toggleSnd==='function'?UI.toggleSnd():Snd.toggle();
+    notify('Sound: '+(muted?'OFF':'ON'));
+  }
+  if(k==='i'&&ST.phase==='explore'&&!isPanelOpen())UI.openInv();
+  if(k==='q'&&ST.phase==='explore'&&!isPanelOpen())UI.openQl();
+  if(k==='v'&&ST.phase==='explore'&&!isPanelOpen())UI.openEv();
+  if(k===' '&&ST.phase==='explore'&&!isPanelOpen()){
     e.preventDefault();
     ST.eyeOn=!ST.eyeOn;
     document.getElementById('eo').style.display=ST.eyeOn?'block':'none';
@@ -953,11 +1177,36 @@ document.addEventListener('keyup',e=>{
   ST.keys[e.key.toLowerCase()]=false;
 });
 
+(function(){
+  const tspin=document.getElementById('tc');
+  if(!tspin)return;
+  const R=['arrowup','arrowdown','arrowleft','arrowright'];
+  const clearK=()=>R.forEach(k=>ST.keys[k]=false);
+  document.querySelectorAll('#tc .tc-d').forEach(b=>{
+    const k=b.dataset.k;if(!k)return;
+    b.addEventListener('pointerdown',e=>{e.preventDefault();ST.keys[k]=true;b.classList.add('tc-p');});
+    b.addEventListener('pointerup',e=>{e.preventDefault();ST.keys[k]=false;b.classList.remove('tc-p');});
+    b.addEventListener('pointercancel',()=>{ST.keys[k]=false;b.classList.remove('tc-p');});
+    b.addEventListener('pointerleave',()=>{ST.keys[k]=false;b.classList.remove('tc-p');});
+  });
+  document.addEventListener('pointerup',()=>{clearK();document.querySelectorAll('#tc .tc-d').forEach(b=>b.classList.remove('tc-p'));});
+  const tca=document.getElementById('tcAct');
+  if(tca)tca.addEventListener('pointerdown',e=>{e.preventDefault();if(ST.phase==='explore'&&!isPanelOpen())interact();});
+  const tcm=document.getElementById('tcMen');
+  if(tcm)tcm.addEventListener('pointerdown',e=>{e.preventDefault();if(ST.phase==='explore'&&!isPanelOpen())UI.openMn();});
+})();
+
 let lastFrame=0;
 function gameLoop(ts){
   ST.dt=ts-lastFrame;lastFrame=ts;
   if(ST.attackFlash>0)ST.attackFlash-=ST.dt;
   updateCombatFx(ST.dt);
+  if(ST.phase==='explore'&&ST.p){
+    if(!ST.p.stat)ST.p.stat={kills:{},battles:0,deaths:0,evPick:0,buys:0,sells:0,pots:0,theories:0,steps:0,playMs:0};
+    ST.p.stat.playMs=(ST.p.stat.playMs||0)+ST.dt;
+    ST._achT=(ST._achT||0)+ST.dt;
+    if(ST._achT>2000){ST._achT=0;if(typeof checkAch==='function')checkAch();}
+  }
   update();
   render();
   requestAnimationFrame(gameLoop);

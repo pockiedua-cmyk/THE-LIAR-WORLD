@@ -3,6 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Veil of Lies - a detective RPG where lies believed by many can become reality. Investigate, gather evidence, and uncover the First Lie across seven regions.">
+<meta property="og:title" content="Veil of Lies">
+<meta property="og:description" content="A detective RPG where your only weapon is evidence. Everyone can speak. Truth is not guaranteed.">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#0a0510">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
 <title>Veil of Lies</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -33,10 +41,10 @@
         <button class="active" id="tabLogin" onclick="LoginUI.switchTab('login')">LOGIN</button>
         <button id="tabRegister" onclick="LoginUI.switchTab('register')">REGISTER</button>
       </div>
-      <div class="login-err" id="loginErr"></div>
-      <input type="text" id="loginUser" placeholder="Username" maxlength="16" autocomplete="off">
-      <input type="password" id="loginPass" placeholder="Password" maxlength="24">
-      <input type="password" id="loginPass2" placeholder="Confirm Password" maxlength="24" style="display:none">
+      <div class="login-err" id="loginErr" role="alert"></div>
+      <input type="text" id="loginUser" placeholder="Username" maxlength="16" aria-label="Username" autocomplete="username">
+      <input type="password" id="loginPass" placeholder="Password" maxlength="24" aria-label="Password" autocomplete="current-password">
+      <input type="password" id="loginPass2" placeholder="Confirm Password" maxlength="24" aria-label="Confirm password" autocomplete="new-password" style="display:none">
       <button class="ls-submit" id="loginSubmit" onclick="LoginUI.submit()">LOGIN</button>
       <div class="ls-or"><span></span><p>or</p><span></span></div>
       <button class="ls-guest" onclick="LoginUI.guestMode()">PLAY AS GUEST</button>
@@ -64,10 +72,11 @@
     <p class="ts-quote">Everyone can speak. Truth is not guaranteed.<br>In this world, lies believed by many can become reality.<br>Your only weapon is evidence.</p>
   </div>
   <div class="ts-bottom">
-    <input type="text" id="nameInput" placeholder="Enter your name, Wanderer..." maxlength="20">
+    <input type="text" id="nameInput" placeholder="Enter your name, Wanderer..." maxlength="20" aria-label="Character name">
     <button class="ts-btn ts-btn-main" onclick="G.startNewGame()">&#9654;&ensp;BEGIN JOURNEY</button>
     <button class="ts-btn" id="loadBtn" onclick="G.loadGame()" style="display:none">&#8634;&ensp;CONTINUE</button>
     <button class="ts-btn ts-btn-sm" onclick="G.showRanking()">GLOBAL RANKING</button>
+    <button class="ts-btn ts-btn-sm" onclick="G.ui.openHelp()">HOW TO PLAY</button>
   </div>
 </div>
 </div>
@@ -77,6 +86,7 @@
 <div class="bar"><div class="fill mpf" id="mpB" style="width:100%"></div><span class="st" id="mpT">50/50</span></div>
 <div class="bar"><div class="fill xpf" id="xpB" style="width:0%"></div><span class="st" id="xpT">0/100</span></div>
 <div class="ln" id="ln">Prologue</div>
+<div class="obj" id="obj" style="display:none"></div>
 </div>
 <div id="sp" style="display:none">
 <div class="sr"><span>ATK</span><span class="sv" id="sA">10</span></div>
@@ -85,19 +95,38 @@
 <div class="sr"><span>MAG</span><span class="sv" id="sM">6</span></div>
 <div class="sr"><span>LCK</span><span class="sv" id="sL">3</span></div>
 <div class="sr"><span>INS</span><span class="sv" id="sI">5</span></div>
+<div class="sr" style="border-top:1px solid #2a1a3a;margin-top:3px;padding-top:3px"><span>Weapon</span><span class="sv" id="sWp">None</span></div>
+<div class="sr"><span>Armor</span><span class="sv" id="sAr">None</span></div>
 <div class="sr" style="border-top:1px solid #2a1a3a;margin-top:3px;padding-top:3px"><span>Gold</span><span class="sv" id="sG">0</span></div>
 </div>
 <div id="dlg"><canvas class="dp" id="dP" width="64" height="64"></canvas><div class="dc"><div class="spk" id="dS">???</div><div class="txt" id="dT"></div><div class="cho" id="dC"></div></div></div>
-<div id="ev"><div class="eh"><h2>EVIDENCE BOARD</h2><button class="btn btn-sm" onclick="G.ui.closeEv()">CLOSE [E]</button></div><div class="ec" id="evC"><div class="cl" id="evN"><h3>NPC Statements</h3></div><div class="cl" id="evP"><h3>Physical Evidence</h3></div><div class="cl" id="evD"><h3>Documents</h3></div><div class="cl" id="evT"><h3>Your Theories</h3></div></div></div>
+<div id="ev"><div class="eh"><h2>EVIDENCE BOARD</h2><div style="display:flex;gap:4px;align-items:center;"><button class="btn btn-sm" id="thBtn" title="Select 2 evidence cards then form a theory (gives +3 score &amp; +1 Insight)">FORM THEORY</button><button class="btn btn-sm" onclick="G.ui.closeEv()">CLOSE [V]</button></div></div><div style="padding:6px 18px;font-size:10px;color:#6a6a8a;">Click evidence cards to select. Form theories to connect the pieces.</div><div class="ec" id="evC"><div class="cl" id="evN"><h3>NPC Statements</h3></div><div class="cl" id="evP"><h3>Physical Evidence</h3></div><div class="cl" id="evD"><h3>Documents</h3></div><div class="cl" id="evT"><h3>Your Theories</h3></div></div></div>
 <div id="inv"><div class="ih"><h2>INVENTORY</h2><button class="btn btn-sm" onclick="G.ui.closeInv()">CLOSE [I]</button></div><div style="padding:8px 18px;font-size:11px;color:#6a6a8a;">Each item may hold a clue.</div><div class="ig" id="iG"></div></div>
 <div id="cm"><div class="ce"><div class="es" id="cmS"></div><div class="en" id="cmN">???</div><div class="ehb"><div class="ehf" id="cmH" style="width:100%"></div></div><div style="font-size:9px;color:#aaa" id="cmHT">HP: ???</div></div><div class="cl2" id="cmL"></div><div class="ca" id="cmA"></div></div>
 <div id="ql"><div class="qh"><h2>QUEST JOURNAL</h2><button class="btn btn-sm" onclick="G.ui.closeQl()">CLOSE [Q]</button></div><div id="qL"></div></div>
-<div id="mn"><div class="mt">PAUSED</div><button class="btn" onclick="G.ui.closeMn()">RESUME</button><button class="btn" onclick="G.ui.closeMn();G.ui.openEv()">EVIDENCE BOARD</button><button class="btn" onclick="G.ui.closeMn();G.ui.openInv()">INVENTORY</button><button class="btn" onclick="G.ui.closeMn();G.ui.openQl()">QUEST JOURNAL</button><button class="btn" onclick="G.ui.closeMn();G.showRanking()">RANKING</button><button class="btn" onclick="G.saveGame()">SAVE GAME</button><button class="btn btn-d" onclick="G.returnToTitle()">QUIT</button></div>
+<div id="mn"><div class="mt">PAUSED</div><button class="btn" onclick="G.ui.closeMn()">RESUME</button><button class="btn" onclick="G.ui.closeMn();G.ui.openEv()">EVIDENCE BOARD</button><button class="btn" onclick="G.ui.closeMn();G.ui.openInv()">INVENTORY</button><button class="btn" onclick="G.ui.closeMn();G.ui.openQl()">QUEST JOURNAL</button><button class="btn" onclick="G.ui.closeMn();G.ui.openFeats()">FEATS &amp; STATS</button><button class="btn" onclick="G.ui.closeMn();G.showRanking()">RANKING</button><button class="btn" id="sndBtn" onclick="G.ui.toggleSnd()">SOUND: ON</button><button class="btn" onclick="G.ui.closeMn();G.ui.openHelp()">HOW TO PLAY</button><button class="btn" onclick="G.saveGame()">SAVE GAME</button><button class="btn btn-d" onclick="G.returnToTitle()">QUIT</button></div>
 <div id="rk"><div class="rh"><h2>GLOBAL RANKING</h2><button class="btn btn-sm" onclick="G.ui.closeRk()">CLOSE</button></div><div id="rTb" style="padding:8px 18px;display:flex;gap:4px;flex-wrap:wrap;"></div><div class="rtb" id="rT"></div></div>
+<div id="hp"><div class="ih"><h2>HOW TO PLAY</h2><button class="btn btn-sm" onclick="G.ui.closeHelp()">CLOSE</button></div><div class="hp-b"><div class="hp-s"><h3>CONTROLS</h3><div class="hp-k">WASD / Arrow Keys &#8212; Move</div><div class="hp-k">E &#8212; Interact / Talk</div><div class="hp-k">Z / C &#8212; Rotate Camera</div><div class="hp-k">I &#8212; Inventory</div><div class="hp-k">Q &#8212; Quest Journal</div><div class="hp-k">V &#8212; Evidence Board</div><div class="hp-k">Space &#8212; Eye of Truth</div><div class="hp-k">M &#8212; Toggle Sound</div><div class="hp-k">ESC &#8212; Menu</div></div><div class="hp-s"><h3>TIPS</h3><div class="hp-k">Press E near villagers and objects to investigate.</div><div class="hp-k">Collect evidence &#8212; the right proof unlocks new dialogue.</div><div class="hp-k">Eye of Truth (Space) reveals hidden evidence within range.</div><div class="hp-k">Higher Insight unlocks special NPCs and secrets.</div><div class="hp-k">Merchants (E) sell weapons, armor and potions. Earn gold from combat.</div><div class="hp-k">Select 2 evidence on the board and FORM THEORY for rewards.</div><div class="hp-k">Not everyone tells the truth. Compare stories, find the cracks.</div><div class="hp-k">On touch screens, use the on-screen D-pad and buttons.</div></div></div></div>
+<div id="sh"><div class="ih"><h2 id="shT">SHOP</h2><span id="shG" style="color:#ffd700;font-size:12px;">Gold: 0</span><button class="btn btn-sm" onclick="G.ui.closeShop()">CLOSE [E]</button></div><div style="padding:6px 18px;font-size:10px;color:#6a6a8a;">Buy gear and supplies with gold. Click your items on the right to sell.</div><div class="shb" id="shB"></div></div>
+<div id="ft"><div class="ih"><h2>FEATS &amp; STATS</h2><button class="btn btn-sm" onclick="G.ui.closeFeats()">CLOSE [E]</button></div><div id="ftTabs" style="padding:8px 18px;display:flex;gap:4px;flex-wrap:wrap;"></div><div id="ftBody" style="padding:0 18px 24px;"></div></div>
+<div id="dmgV"></div>
+<div id="achToast"></div>
 <div id="ch"><h1 id="cHT"></h1><p id="cHS"></p></div>
 <div id="es"><h1 id="eT"></h1><div class="ett" id="eTy"></div><div id="eTx"></div><br><button class="btn" onclick="G.returnToTitle()">RETURN</button><button class="btn" id="ngBtn" onclick="G.newGamePlus()" style="display:none">NEW GAME+</button></div>
 <div id="nfy"></div>
 <div id="ctl"><span class="ctl-key">WASD</span> Move <span class="ctl-sep">|</span> <span class="ctl-key">E</span> Interact <span class="ctl-sep">|</span> <span class="ctl-key">Z</span><span class="ctl-key">C</span> Camera <span class="ctl-sep">|</span> <span class="ctl-key">I</span> Bag <span class="ctl-sep">|</span> <span class="ctl-key">Q</span> Quest <span class="ctl-sep">|</span> <span class="ctl-key">V</span> Evidence <span class="ctl-sep">|</span> <span class="ctl-key">Space</span> Eye of Truth <span class="ctl-sep">|</span> <span class="ctl-key">ESC</span> Menu</div>
+<div id="tc">
+  <div class="tc-dpad">
+    <button class="tc-d" data-k="arrowup" aria-label="Move up">&#9650;</button>
+    <button class="tc-d" data-k="arrowleft" aria-label="Move left">&#9668;</button>
+    <button class="tc-d" data-k="arrowright" aria-label="Move right">&#9658;</button>
+    <button class="tc-d" data-k="arrowdown" aria-label="Move down">&#9660;</button>
+  </div>
+  <div class="tc-actions">
+    <button class="tc-a" id="tcAct" aria-label="Interact">E</button>
+    <button class="tc-a" id="tcMen" aria-label="Menu">&#9776;</button>
+  </div>
+</div>
 <canvas id="cmp" width="52" height="52"></canvas>
 <canvas id="mm"></canvas>
 <div class="eo" id="eo"></div>
@@ -191,6 +220,8 @@
 
     var raf;
     function draw(){
+      var host=c.parentNode;
+      if(host&&host.style&&host.style.display==='none'){raf=requestAnimationFrame(draw);return;}
       var t=Date.now()*0.001;
       ctx.clearRect(0,0,W,H);
 
@@ -362,10 +393,19 @@
   }
 })();
 </script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="js/three.min.js"></script>
 <script src="js/sprites.js"></script>
 <script src="js/data.js"></script>
 <script src="js/renderer3d.js"></script>
 <script src="js/engine.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/features.js"></script>
+<script>
+if('serviceWorker' in navigator){
+  window.addEventListener('load',function(){
+    navigator.serviceWorker.register('sw.js').catch(function(){});
+  });
+}
+</script>
 </body>
 </html>

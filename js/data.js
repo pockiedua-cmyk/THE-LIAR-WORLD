@@ -84,8 +84,8 @@ objs:[
 {id:'stone',em:'🗿',x:9,y:14,nm:'Carved Stone',tp:'invest',evid:'carved_stone'}],
 enemies:[
 {nm:'Shadow Wolf',sp:'🐺',hp:65,at:14,df:4,sp2:9,xp:25,gld:12,tw:true,atk:[{nm:'Shadow Bite',pw:16},{nm:'Howl',pw:8,mg:1}],ev:{id:'shadow_essence',t:'Shadow Wolf Essence',d:'Dark energy from the Shadow Wolf.',s:'Combat'}},
-{nm:'Forest Spider',sp:'🕷️',hp:45,at:12,df:2,sp2:11,xp:18,gld:7,atk:[{nm:'Bite',pw:13},{nm:'Web Shot',pw:6,mg:1}]}],
-re:[{nm:'Shadow Wolf',sp:'🐺',hp:65,at:14,df:4,sp2:9,xp:25,gld:12,atk:[{nm:'Shadow Bite',pw:16}]},{nm:'Forest Spider',sp:'🕷️',hp:45,at:12,df:2,sp2:11,xp:18,gld:7,atk:[{nm:'Bite',pw:13}]}],
+{nm:'Forest Spider',sp:'🕷️',hp:45,at:12,df:2,sp2:11,xp:18,gld:7,pz:45,atk:[{nm:'Bite',pw:13},{nm:'Web Shot',pw:6,mg:1}]}],
+re:[{nm:'Shadow Wolf',sp:'🐺',hp:65,at:14,df:4,sp2:9,xp:25,gld:12,atk:[{nm:'Shadow Bite',pw:16}]},{nm:'Forest Spider',sp:'🕷️',hp:45,at:12,df:2,sp2:11,xp:18,gld:7,pz:45,atk:[{nm:'Bite',pw:13}]}],
 conn:[{x:20,y:24,r:'pro',m:'vil',tx:3,ty:17},{x:1,y:12,r:'r1',m:'gf',tx:38,ty:12}]};
 
 GD['r1_gf']={name:'Greenfall Village',map:[
@@ -329,9 +329,9 @@ objs:[
 {id:'sdagger',em:'🗡️',x:8,y:7,nm:'Bloody Dagger',tp:'invest',evid:'bloody_dagger'},
 {id:'sletter',em:'✉️',x:6,y:6,nm:'Torn Letter',tp:'invest',evid:'torn_letter'}],
 enemies:[
-{nm:'Sand Scorpion',sp:'🦂',hp:90,at:18,df:12,sp2:8,xp:35,gld:20,atk:[{nm:'Stinger',pw:20}]},
+{nm:'Sand Scorpion',sp:'🦂',hp:90,at:18,df:12,sp2:8,xp:35,gld:20,pz:40,atk:[{nm:'Stinger',pw:20}]},
 {nm:'Desert Bandit',sp:'🗡️',hp:80,at:22,df:6,sp2:11,xp:30,gld:25,atk:[{nm:'Backstab',pw:24}]}],
-re:[{nm:'Sand Scorpion',sp:'🦂',hp:90,at:18,df:12,sp2:8,xp:35,gld:20,atk:[{nm:'Stinger',pw:20}]}],
+re:[{nm:'Sand Scorpion',sp:'🦂',hp:90,at:18,df:12,sp2:8,xp:35,gld:20,pz:40,atk:[{nm:'Stinger',pw:20}]}],
 conn:[{x:9,y:19,r:'r3',m:'fr',tx:9,ty:1}]};
 
 GD['r5_cr']={name:'Crimson Sea - Pirate Port',map:[
