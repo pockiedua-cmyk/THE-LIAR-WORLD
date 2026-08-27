@@ -98,6 +98,12 @@ function uHUD(){
       obj.style.display='block';
     }else obj.style.display='none';
   }
+  const rmr=document.getElementById('rmr');
+  if(rmr){
+    if(p.rum&&Object.values(p.rum).some(function(s){return s&&s.st==='active';})){
+      rmr.style.display='block';
+    }else rmr.style.display='none';
+  }
 }
 
 function notify(t){
@@ -128,7 +134,7 @@ function startQ(id,name,desc,opts){
     Snd.hud();
   }
 }
-function completeQ(id){if(ST.p.fq[id]){ST.p.fq[id].st='done';notify('Complete: '+ST.p.fq[id].name);Snd.ach();if(typeof checkAch==='function')checkAch();}}
+function completeQ(id){if(ST.p.fq[id]){ST.p.fq[id].st='done';notify('Complete: '+ST.p.fq[id].name);Snd.ach();if(typeof rumourTick==='function')rumourTick(2);if(typeof checkAch==='function')checkAch();}}
 function failQ(id){if(ST.p.fq[id])ST.p.fq[id].st='failed';}
 
 function teleport(reg,map,x,y){
@@ -589,9 +595,11 @@ function openDlg(npcId,text,choices){
       let label=ch.text;
       if(ch.ev&&!hasEv(ch.ev))label+=' <span class="ev-tag">[Evidence Required]</span>';
       if(ch.req&&!ST.p.flags[ch.req])label+=' <span class="ev-tag" style="color:#ff6a6a">[Locked]</span>';
+      if(ch.reqev&&!hasEv(ch.reqev))label+=' <span class="ev-tag" style="color:#ff6a6a">[Locked]</span>';
       b.innerHTML=label;
-      if((ch.ev&&!hasEv(ch.ev))||(ch.req&&!ST.p.flags[ch.req]))b.classList.add('lk');
+      if((ch.ev&&!hasEv(ch.ev))||(ch.req&&!ST.p.flags[ch.req])||(ch.reqev&&!hasEv(ch.reqev)))b.classList.add('lk');
       else b.onclick=()=>{
+        if(ch.onpick){ch.onpick();return;}
         if(ch.ev)addEv(ch.ev,ch.ev.replace(/_/g,' '),ch.desc||'Evidence collected.',getNPCName(npcId),'npc');
         if(ch.start)startQ(ch.start,ch.start.replace(/_/g,' '),'Investigate further.',ch.tgt?{tgt:ch.tgt}:null);
         if(ch.end){closeDlg();return;}
@@ -718,6 +726,8 @@ function interact(){
       } else {
         notify('You see something glinting but can\'t make it out. (Need Insight 6)');
       }
+    } else if(ST.p.flags['rum_well']&&obj.id==='well1'&&(obj.tp==='well'||obj.tp==='sign')){
+      openDlg('well','The villagers have come to believe the well grants wishes.',[{text:'Throw in 15 gold and wish.',onpick:function(){wishAtWell();}},{text:'Not now.',end:true}]);
     }
   }
 }
@@ -725,8 +735,9 @@ function interact(){
 function startCombat(enemy){
   ST.phase='combat';
   const e={...enemy,curHp:enemy.hp,pois:(enemy.pz||0)};
-  ST.cs={e,log:[],pTurn:ST.p.spd>=e.sp2,defending:false,turns:0};
-  if(!ST.p.stat)ST.p.stat={kills:{},battles:0,deaths:0,evPick:0,buys:0,sells:0,pots:0,theories:0,steps:0,playMs:0};
+  ST.cs={e,log:[],pTurn:ST.p.spd>=e.sp2,defending:false,turns:0,falseShow:false};
+  if(e.boss&&e.ill&&e.tw){ST.cs.masked=true;}
+  if(!ST.p.stat)ST.p.stat={kills:{},battles:0,deaths:0,evPick:0,buys:0,sells:0,pots:0,theories:0,steps:0,playMs:0,lies:0,masks:0};
   ST.p.stat.battles=(ST.p.stat.battles||0)+1;
   Snd.battle();
   document.getElementById('cm').style.display='block';
@@ -765,10 +776,16 @@ function updateCombat(){
     }
     const fb=document.createElement('button');fb.className='btn btn-sm';fb.style.borderColor='#7a7a9a';
     fb.textContent='FLIGHT';fb.title='Attempt to flee.';
+    fb.disabled=!!cs.falseShow;
     fb.onclick=()=>flightAttempt();a.appendChild(fb);
   } else {
     const b=document.createElement('button');b.className='btn btn-sm';b.textContent='Enemy turn...';b.disabled=true;
     a.appendChild(b);
+  }
+  if(cs.masked){
+    const h=document.createElement('div');h.style.cssText='margin-top:8px;font-size:9px;color:#aa6aff;text-align:center;';
+    h.textContent='\u26D1 '+cs.e.nm+' hides something. Use Eye of Truth to shatter its mask.';
+    a.appendChild(h);
   }
 }
 
@@ -841,6 +858,7 @@ function pAction(sk){
   let dmg=0;
   if(sk==='Attack'){
     dmg=Math.max(1,p.atk+Math.floor(Math.random()*5)-e.df/2|0);
+    if(cs.falseShow){dmg=Math.ceil(dmg*2);cs.log.push({t:'Truth sears the false form! Attack x2!',c:'hl'});}
     e.curHp-=dmg;
     cs.log.push({t:`You attack for ${dmg} damage!`,c:'dm'});
     addCombatFx('-'+dmg,'#ff6644',window.innerWidth/2+30,window.innerHeight*0.28);ST.attackFlash=200;triggerShake(4);
@@ -849,6 +867,7 @@ function pAction(sk){
     if(p.mp<10){cs.log.push({t:'Not enough MP!',c:'nf'});updateCombat();return;}
     p.mp-=10;
     dmg=Math.max(1,p.mag*2+Math.floor(Math.random()*8));
+    if(cs.falseShow){dmg=Math.ceil(dmg*2);cs.log.push({t:'Aura of truth! Magic Blast x2!',c:'hl'});}
     e.curHp-=dmg;
     cs.log.push({t:`Magic Blast hits for ${dmg}!`,c:'dm'});
     addCombatFx('-'+dmg,'#66aaff',window.innerWidth/2+30,window.innerHeight*0.28);ST.attackFlash=300;triggerShake(6);
@@ -868,7 +887,21 @@ function pAction(sk){
   } else if(sk==='Eye of Truth'){
     if(p.mp<15){cs.log.push({t:'Not enough MP!',c:'nf'});updateCombat();return;}
     p.mp-=15;
-    if(e.tw){
+    if(cs.masked){
+      cs.masked=false;
+      cs.falseShow=true;
+      p.stat.masks=(p.stat.masks||0)+1;
+      cs.log.push({t:'The mask shatters! '+e.tw2+' sloughs away, revealing the TRUE form!',c:'nf'});
+      cs.log.push({t:'Its defenses are broken \u2014 a moment of truth!',c:'hl'});
+      triggerShake(8);
+      document.getElementById('eo').style.display='block';
+      Snd.eye();combatFlash();triggerShake(6);
+      setTimeout(()=>{document.getElementById('eo').style.display='none';},1000);
+      const nm2=e.tw2||('the truth of '+e.nm);
+      cs.log.push({t:'True form: '+nm2+'! Bonus damage until you are dealt a heavy blow.',c:'nf'});
+      if(!hasF('mask_empty'))setF('mask_empty');
+      if(typeof checkAch==='function')checkAch();
+    } else if(e.tw){
       e.curHp=0;
       cs.log.push({t:'Eye of Truth reveals the weakness! '+e.nm+' is devastated!',c:'nf'});
       document.getElementById('eo').style.display='block';
@@ -882,6 +915,7 @@ function pAction(sk){
     }
   }
   uHUD();
+  if(cs.falseShow&&e.curHp<=0){e.curHp=1;}
   if(e.curHp<=0){
     cs.log.push({t:e.nm+' defeated!',c:'nf'});
     updateCombat();
@@ -915,6 +949,10 @@ function eTurn(){
   if(e.stun)dmg*=e.stun;
   p.hp-=dmg;
   cs.log.push({t:e.nm+' uses '+at.nm+' for '+dmg+'!',c:'dm'});
+  if(cs.falseShow){
+    cs.falseShow=false;
+    cs.log.push({t:'The false form rages — the truth window slams shut!',c:'dm'});
+  }
   addCombatFx('-'+dmg,'#ff4444',window.innerWidth/2-30,window.innerHeight*0.6);triggerShake(3);
   Snd.hurt();playerHurtFx();
   if(e.pz&&Math.random()*100<e.pz){
@@ -1205,7 +1243,7 @@ function gameLoop(ts){
     if(!ST.p.stat)ST.p.stat={kills:{},battles:0,deaths:0,evPick:0,buys:0,sells:0,pots:0,theories:0,steps:0,playMs:0};
     ST.p.stat.playMs=(ST.p.stat.playMs||0)+ST.dt;
     ST._achT=(ST._achT||0)+ST.dt;
-    if(ST._achT>2000){ST._achT=0;if(typeof checkAch==='function')checkAch();}
+    if(ST._achT>2000){ST._achT=0;if(typeof checkAch==='function')checkAch();if(typeof rumourTick==='function')rumourTick(1);}
   }
   update();
   render();

@@ -125,6 +125,8 @@ const Snd=(function(){
     buy:function(){tone(587,0.1,'square',0.05);tone(880,0.12,'square',0.05,0.08);},
     sell:function(){tone(880,0.1,'square',0.05);tone(587,0.12,'square',0.05,0.08);},
     theo:function(){tone(494,0.12,'sine',0.05);tone(622,0.12,'sine',0.05,0.1);tone(740,0.2,'sine',0.05,0.2);},
+    rum:function(){tone(180,0.14,'sawtooth',0.05,0,90);tone(130,0.22,'sawtooth',0.05,0.12,70);noise(0.18,0.04,500);},
+    seal:function(){[196,147,98,65].forEach(function(f,i){tone(f,0.34,'sine',0.07,i*0.13);});tone(65,0.9,'sine',0.08,0.4);},
     deny:function(){tone(200,0.12,'square',0.05,0,160);},
     step:function(){tone(150,0.05,'triangle',0.015);}
   };

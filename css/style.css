@@ -1280,6 +1280,14 @@ button:focus-visible,
   line-height: 1.4;
 }
 
+.rmr {
+  margin-top: 2px;
+  color: #aa6aff;
+  font-size: 8px;
+  max-width: 190px;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.9);
+}
+
 #sWp, #sAr {
   font-size: 8px;
   max-width: 70px;

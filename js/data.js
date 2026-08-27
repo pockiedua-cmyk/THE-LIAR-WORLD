@@ -167,7 +167,7 @@ objs:[
 {id:'bloodstain',em:'🔴',x:15,y:7,nm:'Old Blood Stain',tp:'invest',evid:'church_blood'},
 {id:'dungeon',em:'🕳️',x:16,y:8,nm:'Hidden Passage',tp:'stairs',tr:'r1_gfd',tx:14,ty:3}],
 enemies:[
-{nm:'Root Beast',sp:'🐉',hp:200,at:25,df:12,sp2:6,xp:80,gld:50,boss:true,tw:true,atk:[{nm:'Root Eruption',pw:28},{nm:'Nature Wrath',pw:22,mg:1}],ev:{id:'heart_seed',t:'Heart Seed Fragment',d:'The true Heart Seed, hidden under the altar.',s:'Boss'}}],
+{nm:'Root Beast',sp:'🐉',hp:200,at:25,df:12,sp2:6,xp:80,gld:50,boss:true,tw:true,ill:true,mask:6,tw2:'A tame creature bound by a lie - not the wild beast the story claimed.',atk:[{nm:'Root Eruption',pw:28},{nm:'Nature Wrath',pw:22,mg:1}],ev:{id:'heart_seed',t:'Heart Seed Fragment',d:'The true Heart Seed, hidden under the altar.',s:'Boss'}}],
 re:[],
 conn:[{x:39,y:12,r:'r1',m:'gf',tx:1,ty:12}]};
 
@@ -451,7 +451,7 @@ objs:[
 {id:'zaltar2',em:'⭐',x:7,y:6,nm:'First Lie Altar',tp:'invest',evid:'first_lie_altar'},
 {id:'zshard',em:'💎',x:8,y:7,nm:'Truth Shard',tp:'invest',evid:'truth_shard'}],
 enemies:[
-{nm:'The First Liar',sp:'👹',hp:500,at:35,df:25,sp2:10,xp:200,gld:100,boss:true,tw:true,atk:[{nm:'Deception Wave',pw:30,mg:1},{nm:'Reality Warp',pw:35,mg:1}],ev:{id:'liar_truth',t:'The Liar Confession',d:'Proof that The First Liar was trying to stop war.',s:'Final Boss'}}],
+{nm:'The First Liar',sp:'👹',hp:500,at:35,df:25,sp2:10,xp:200,gld:100,boss:true,tw:true,ill:true,mask:10,tw2:'The false god was always a GARDENER, tending the world by hiding its pain. Truth cannot hurt what stands in it.',atk:[{nm:'Deception Wave',pw:30,mg:1},{nm:'Reality Warp',pw:35,mg:1}],ev:{id:'liar_truth',t:'The Liar Confession',d:'Proof that The First Liar was trying to stop war.',s:'Final Boss'}}],
 re:[],
 conn:[{x:9,y:19,r:'r6',m:'sky',tx:9,ty:1}]};
 }
@@ -487,7 +487,8 @@ DLG['merchant']=[
 {text:'A villager did this?',next:3},
 {text:'Who? Tell me!',next:4}]},
 {txt:'Health potions, basic gear. Nothing fancy. A village this poor doesn\'t attract quality merchants.',ch:[
-{text:'Back to the attack.',next:1}]},
+{text:'Back to the attack.',next:1},
+{text:'Actually... I heard you looted the shop before the fire.',reqev:'drunk_testimony',rum:'merchant_fire',onpick:function(){splitRum('merchant_fire');}}]},
 {txt:'I can\'t name names without proof. That\'s how people disappear around here. But check the blacksmith\'s forge - he was working late that night.',ch:[
 {text:'I\'ll check it out.',end:true,ev:'merchant_testimony'}]},
 {txt:'I said too much already. Find your own evidence, stranger. That\'s safer for both of us.',ch:[{text:'Understood.',end:true}]}];
@@ -503,7 +504,8 @@ DLG['child']=[
 {txt:'Right by the well! The old one near grandma Mira\'s house. I wanted to look but mommy said no.',ch:[
 {text:'Smart mommy. I\'ll check.',end:true,ev:'child_witness'}]},
 {txt:'The old man Gorn saw it too! And maybe the drunk guy but he says he sees things all the time so nobody believes him.',ch:[
-{text:'I\'ll talk to the drunkard.',end:true}]}];
+{text:'I\'ll talk to the drunkard.',end:true},
+{text:'What if the WELL grants wishes? I bet it does.',rum:'well_wish',onpick:function(){splitRum('well_wish');}}]}];
 
 DLG['drunk']=[
 {txt:'*hic* Another one asking questions? Let me tell you something for free - nobody tells the truth in this village. NOBODY.',ch:[
@@ -515,7 +517,8 @@ DLG['drunk']=[
 {text:'Someone planned this?',next:3},
 {text:'Who moved the goods?',next:4}]},
 {txt:'I saw a figure. Not a bandit. Not a beast. A person from the village, carrying torches. But... it could have been me. I was very drunk.',ch:[
-{text:'That\'s not helpful.',end:true,ev:'drunk_testimony'}]},
+{text:'That\'s not helpful.',end:true,ev:'drunk_testimony'},
+{text:'What if it was the BLACKSMITH? I bet Gron torched his own village...',reqev:'drunk_testimony',rum:'smith_thief',onpick:function(){splitRum('smith_thief');}}]},
 {txt:'The merchant. He was packing things into a cart two nights before. Said he was "reorganizing." Yeah right.',ch:[{text:'Interesting...',end:true}]}];
 
 DLG['mira']=[

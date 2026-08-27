@@ -31,6 +31,9 @@ const ACHDEFS=[
   {id:'theorist',ic:'\u2AF3',n:'Theorist',d:'Form 3 theories on the evidence board.'},
   {id:'shopper',ic:'\u2699',n:'Economist',d:'Buy and sell at the merchant.'},
   {id:'carto',ic:'\u25C8',n:'Cartographer',d:'Unlock all 7 regions.'},
+  {id:'rumormonger',ic:'\u2622',n:'Whisperer',d:'Spread your first rumour. A lie, set loose on the world.'},
+  {id:'world_shaper',ic:'\u29C9',n:'World-Shaper',d:'Let a rumour you spread transform the world around you.'},
+  {id:'maskbreaker',ic:'\u29BF',n:'Mask Breaker',d:'Shatter a boss mask and face its true form.'},
   {id:'ending',ic:'\u2600',n:'Truth Seeker',d:'Reach any ending.'}
 ];
 
@@ -48,6 +51,9 @@ function achOk(a){
   if(a.id==='theorist')return (p.th&&p.th.length||0)>=3;
   if(a.id==='shopper')return (p.stat&&(p.stat.buys||0)+(p.stat.sells||0)||0)>=1;
   if(a.id==='carto')return (p.unlocked||[]).length>=7;
+  if(a.id==='rumormonger')return (p.stat&&p.stat.lies||0)>=1;
+  if(a.id==='world_shaper')return (p.rum?Object.values(p.rum).filter(r=>r&&r.st==='sealed').length:0)>=1;
+  if(a.id==='maskbreaker')return (p.stat&&p.stat.masks||0)>=1;
   if(a.id==='ending')return (p.endings&&p.endings.size||0)>=1;
   return false;
 }
@@ -55,7 +61,8 @@ function achOk(a){
 function initFeats(){
   const p=ST.p;
   p.ach=p.ach||[];p.th=p.th||[];
-  p.stat=p.stat||{kills:{},battles:0,deaths:0,evPick:0,buys:0,sells:0,pots:0,theories:0,steps:0,playMs:0};
+  p.stat=p.stat||{kills:{},battles:0,deaths:0,evPick:0,buys:0,sells:0,pots:0,theories:0,steps:0,playMs:0,lies:0,masks:0};
+  p.rum=p.rum||{};
   p.gear=p.gear||{wp:null,ar:null};
   p.poison=p.poison||0;
 }
@@ -118,6 +125,8 @@ function renderStats(){
     ['Items Bought',st.buys],
     ['Items Sold',st.sells],
     ['Potions Used',st.pots],
+    ['Lies Spread',st.lies||0],
+    ['Masks Broken',st.masks||0],
     ['Bosses Defeated',(p.bd||[]).length],
     ['Endings Reached',(p.endings?p.endings.size:0)]
   ];
@@ -145,6 +154,26 @@ function renderBest(){
   b.appendChild(g);
 }
 
+function renderRums(){
+  const b=document.getElementById('ftBody');if(!b)return;
+  const p=ST.p;initFeats();
+  b.innerHTML='';
+  const rs=Object.entries(RUMORS);
+  const got=rs.filter(([id])=>p.rum&&p.rum[id]);
+  if(!got.length){b.innerHTML='<div class="ei" style="padding:16px;color:#6a6a8a">No rumours recorded. Speak of things you have not seen, and the world will change.</div>';return;}
+  const g=document.createElement('div');g.className='bgr';
+  got.forEach(([id,r])=>{
+    const s=p.rum[id];const st=s?s.st:'none';
+    const d=document.createElement('div');d.className='bgr-i';
+    const ic=st==='sealed'?'\u2714':st==='active'?'\u25CB':'\u2022';
+    const lab=st==='active'?'Spreading...':st==='sealed'?'Sealed - it became real':'Never spread';
+    const col=st==='sealed'?'#ffaa00':st==='active'?'#8a6aff':'#6a6a8a';
+    d.innerHTML='<span>'+ic+' '+r.nm+'</span><span class="bgr-c" style="color:'+col+'">'+lab+'</span>';
+    g.appendChild(d);
+  });
+  b.appendChild(g);
+}
+
 function openFeats(tab){
   document.getElementById('ft').style.display='block';
   renderFeatTabs(tab||'ach');
@@ -156,14 +185,23 @@ function closeFeats(){
 
 function renderFeatTabs(cat){
   const pb=document.getElementById('ftTabs');pb.innerHTML='';
-  [{id:'ach',l:'ACHIEVEMENTS'},{id:'stats',l:'STATISTICS'},{id:'best',l:'BESTIARY'}].forEach(t=>{
+  [{id:'ach',l:'ACHIEVEMENTS'},{id:'stats',l:'STATISTICS'},{id:'best',l:'BESTIARY'},{id:'rums',l:'RUMOURS'}].forEach(t=>{
     const b=document.createElement('button');
     b.className='btn btn-sm';if(t.id===cat)b.style.borderColor='#ffaa00';
     b.textContent=t.l;b.onclick=()=>renderFeatTabs(t.id);pb.appendChild(b);
   });
   if(cat==='ach')renderAch();
   else if(cat==='stats')renderStats();
+  else if(cat==='rums')renderRums();
   else renderBest();
+}
+
+function shopItemsFor(npcId){
+  const sc=SHOPS[npcId];if(!sc)return[];
+  let list=sc.items.slice();
+  if(npcId==='smith'&&hasF('rum_sealed_smith_thief'))list=['hpotion'];
+  list=list.slice(0,4);
+  return list;
 }
 
 function renderShop(npcId){
@@ -174,15 +212,19 @@ function renderShop(npcId){
   const b=document.getElementById('shB');b.innerHTML='';
   const col=document.createElement('div');col.className='sh-col';
   const hh=document.createElement('h3');hh.textContent='BUY';col.appendChild(hh);
-  sc.items.forEach(id=>{
+  const list=shopItemsFor(npcId);
+  if(!list.length){const n=document.createElement('div');n.className='sh-empty';n.innerHTML='<span style="color:#ff6a6a">You are no longer welcome here.</span>';col.appendChild(n);}
+  list.forEach(id=>{
     const it=ITEM_DEFS[id];if(!it)return;
+    let pr=it.price;
+    if(hasF('rum_sealed_merchant_fire'))pr=Math.ceil(pr*1.4);
     const row=document.createElement('div');row.className='sh-r';
     const info=document.createElement('div');info.className='sh-i';
     info.innerHTML='<span class="sh-ic">'+it.icon+'</span><div class="sh-t"><b>'+it.nm+'</b><span class="sh-c">'+it.desc+'</span></div>';
     const buy=document.createElement('button');buy.className='btn btn-sm';
-    buy.textContent=it.price+'g';
-    if(p.gold<it.price){buy.disabled=true;}
-    buy.onclick=()=>buyItem(npcId,id);
+    buy.textContent=pr+'g';
+    if(p.gold<pr){buy.disabled=true;}
+    buy.onclick=()=>buyItem(npcId,id,pr);
     row.appendChild(info);row.appendChild(buy);col.appendChild(row);
   });
   b.appendChild(col);
@@ -208,10 +250,12 @@ function renderShop(npcId){
   b.appendChild(col2);
 }
 
-function buyItem(npcId,id){
-  const p=ST.p,it=ITEM_DEFS[id];if(!it)return;
-  if(p.gold<it.price){Snd.deny();notify('Not enough gold.');return;}
-  p.gold-=it.price;
+function buyItem(npcId,id,pr){
+  const p=ST.p,it=ITEM_DEFS[id];
+  if(!it)return;
+  const price=pr===undefined?it.price:pr;
+  if(p.gold<price){Snd.deny();notify('Not enough gold.');return;}
+  p.gold-=price;
   addItem({...it});
   p.stat.buys=(p.stat.buys||0)+1;
   Snd.buy();
