@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>THE LIAR WORLD</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="game3d"></div>
+<div id="loginScreen">
+<canvas id="sceneCanvas"></canvas>
+<div class="ls-overlay"></div>
+<div class="ls-layout">
+  <div class="ls-left">
+    <div class="ls-logo-wrap">
+      <canvas id="logoCanvas" width="160" height="160"></canvas>
+    </div>
+    <div class="ls-title-area">
+      <div class="ls-sub-top">A DETECTIVE RPG</div>
+      <h1 class="ls-title">THE LIAR<br>WORLD</h1>
+      <div class="ls-line"></div>
+      <p class="ls-quote">"In this world, lies believed by many<br>can become reality."</p>
+    </div>
+  </div>
+  <div class="ls-right">
+    <div class="ls-box">
+      <h2 id="loginTitle">SIGN IN</h2>
+      <div class="login-tabs">
+        <button class="active" id="tabLogin" onclick="LoginUI.switchTab('login')">LOGIN</button>
+        <button id="tabRegister" onclick="LoginUI.switchTab('register')">REGISTER</button>
+      </div>
+      <div class="login-err" id="loginErr"></div>
+      <input type="text" id="loginUser" placeholder="Username" maxlength="16" autocomplete="off">
+      <input type="password" id="loginPass" placeholder="Password" maxlength="24">
+      <input type="password" id="loginPass2" placeholder="Confirm Password" maxlength="24" style="display:none">
+      <button class="ls-submit" id="loginSubmit" onclick="LoginUI.submit()">LOGIN</button>
+      <div class="ls-or"><span></span><p>or</p><span></span></div>
+      <button class="ls-guest" onclick="LoginUI.guestMode()">PLAY AS GUEST</button>
+    </div>
+    <div class="ls-features">
+      <div class="ls-feat"><span class="lf-icon">&#128269;</span><span>7 Unique Regions</span></div>
+      <div class="ls-feat"><span class="lf-icon">&#9876;</span><span>Turn-Based Combat</span></div>
+      <div class="ls-feat"><span class="lf-icon">&#128269;</span><span>Evidence Board</span></div>
+      <div class="ls-feat"><span class="lf-icon">&#128081;</span><span>5 Endings</span></div>
+    </div>
+  </div>
+</div>
+<div class="ls-bottom">v1.0 &mdash; WHERE TRUTH IS NOT GUARANTEED</div>
+</div>
+<div class="user-info" id="userInfo"><span class="ui-name" id="uiName"></span><br><span class="ui-logout" onclick="LoginUI.logout()">Logout</span></div>
+<div id="titleScreen" style="display:none">
+<canvas id="sceneCanvas2"></canvas>
+<div class="ls-overlay"></div>
+<div class="ts-layout">
+  <div class="ts-top">
+    <div class="ts-orn">&#9670; &#9670; &#9670;</div>
+    <h1 class="ts-title">THE LIAR WORLD</h1>
+    <h2 class="ts-sub">A DETECTIVE RPG</h2>
+    <div class="ls-line"></div>
+    <p class="ts-quote">Everyone can speak. Truth is not guaranteed.<br>In this world, lies believed by many can become reality.<br>Your only weapon is evidence.</p>
+  </div>
+  <div class="ts-bottom">
+    <input type="text" id="nameInput" placeholder="Enter your name, Wanderer..." maxlength="20">
+    <button class="ts-btn ts-btn-main" onclick="G.startNewGame()">&#9654;&ensp;BEGIN JOURNEY</button>
+    <button class="ts-btn" id="loadBtn" onclick="G.loadGame()" style="display:none">&#8634;&ensp;CONTINUE</button>
+    <button class="ts-btn ts-btn-sm" onclick="G.showRanking()">GLOBAL RANKING</button>
+  </div>
+</div>
+</div>
+<div id="hud" style="display:none">
+<div class="pi" id="pi">Wanderer | Lv.1</div>
+<div class="bar"><div class="fill hpf" id="hpB" style="width:100%"></div><span class="st" id="hpT">100/100</span></div>
+<div class="bar"><div class="fill mpf" id="mpB" style="width:100%"></div><span class="st" id="mpT">50/50</span></div>
+<div class="bar"><div class="fill xpf" id="xpB" style="width:0%"></div><span class="st" id="xpT">0/100</span></div>
+<div class="ln" id="ln">Prologue</div>
+</div>
+<div id="sp" style="display:none">
+<div class="sr"><span>ATK</span><span class="sv" id="sA">10</span></div>
+<div class="sr"><span>DEF</span><span class="sv" id="sD">8</span></div>
+<div class="sr"><span>SPD</span><span class="sv" id="sS">5</span></div>
+<div class="sr"><span>MAG</span><span class="sv" id="sM">6</span></div>
+<div class="sr"><span>LCK</span><span class="sv" id="sL">3</span></div>
+<div class="sr"><span>INS</span><span class="sv" id="sI">5</span></div>
+<div class="sr" style="border-top:1px solid #2a1a3a;margin-top:3px;padding-top:3px"><span>Gold</span><span class="sv" id="sG">0</span></div>
+</div>
+<div id="dlg"><canvas class="dp" id="dP" width="64" height="64"></canvas><div class="dc"><div class="spk" id="dS">???</div><div class="txt" id="dT"></div><div class="cho" id="dC"></div></div></div>
+<div id="ev"><div class="eh"><h2>EVIDENCE BOARD</h2><button class="btn btn-sm" onclick="G.ui.closeEv()">CLOSE [E]</button></div><div class="ec" id="evC"><div class="cl" id="evN"><h3>NPC Statements</h3></div><div class="cl" id="evP"><h3>Physical Evidence</h3></div><div class="cl" id="evD"><h3>Documents</h3></div><div class="cl" id="evT"><h3>Your Theories</h3></div></div></div>
+<div id="inv"><div class="ih"><h2>INVENTORY</h2><button class="btn btn-sm" onclick="G.ui.closeInv()">CLOSE [I]</button></div><div style="padding:8px 18px;font-size:11px;color:#6a6a8a;">Each item may hold a clue.</div><div class="ig" id="iG"></div></div>
+<div id="cm"><div class="ce"><div class="es" id="cmS"></div><div class="en" id="cmN">???</div><div class="ehb"><div class="ehf" id="cmH" style="width:100%"></div></div><div style="font-size:9px;color:#aaa" id="cmHT">HP: ???</div></div><div class="cl2" id="cmL"></div><div class="ca" id="cmA"></div></div>
+<div id="ql"><div class="qh"><h2>QUEST JOURNAL</h2><button class="btn btn-sm" onclick="G.ui.closeQl()">CLOSE [Q]</button></div><div id="qL"></div></div>
+<div id="mn"><div class="mt">PAUSED</div><button class="btn" onclick="G.ui.closeMn()">RESUME</button><button class="btn" onclick="G.ui.closeMn();G.ui.openEv()">EVIDENCE BOARD</button><button class="btn" onclick="G.ui.closeMn();G.ui.openInv()">INVENTORY</button><button class="btn" onclick="G.ui.closeMn();G.ui.openQl()">QUEST JOURNAL</button><button class="btn" onclick="G.ui.closeMn();G.showRanking()">RANKING</button><button class="btn" onclick="G.saveGame()">SAVE GAME</button><button class="btn btn-d" onclick="G.returnToTitle()">QUIT</button></div>
+<div id="rk"><div class="rh"><h2>GLOBAL RANKING</h2><button class="btn btn-sm" onclick="G.ui.closeRk()">CLOSE</button></div><div id="rTb" style="padding:8px 18px;display:flex;gap:4px;flex-wrap:wrap;"></div><div class="rtb" id="rT"></div></div>
+<div id="ch"><h1 id="cHT"></h1><p id="cHS"></p></div>
+<div id="es"><h1 id="eT"></h1><div class="ett" id="eTy"></div><div id="eTx"></div><br><button class="btn" onclick="G.returnToTitle()">RETURN</button><button class="btn" id="ngBtn" onclick="G.newGamePlus()" style="display:none">NEW GAME+</button></div>
+<div id="nfy"></div>
+<div id="ctl"><span class="ctl-key">WASD</span> Move <span class="ctl-sep">|</span> <span class="ctl-key">E</span> Interact <span class="ctl-sep">|</span> <span class="ctl-key">Z</span><span class="ctl-key">C</span> Camera <span class="ctl-sep">|</span> <span class="ctl-key">I</span> Bag <span class="ctl-sep">|</span> <span class="ctl-key">Q</span> Quest <span class="ctl-sep">|</span> <span class="ctl-key">V</span> Evidence <span class="ctl-sep">|</span> <span class="ctl-key">Space</span> Eye of Truth <span class="ctl-sep">|</span> <span class="ctl-key">ESC</span> Menu</div>
+<canvas id="cmp" width="52" height="52"></canvas>
+<canvas id="mm"></canvas>
+<div class="eo" id="eo"></div>
+<div id="fadeOverlay"></div>
+<script>
+(function(){
+  function drawLogo(c){
+    var ctx=c.getContext('2d');
+    var w=c.width,h=c.height,cx=w/2,cy=h/2;
+    ctx.clearRect(0,0,w,h);
+    var t=Date.now()*0.001;
+    ctx.save();
+    ctx.shadowColor='#6a3fff';ctx.shadowBlur=25;
+    ctx.beginPath();ctx.ellipse(cx,cy,55,35,0,0,Math.PI*2);
+    var eg=ctx.createLinearGradient(cx-55,cy,cx+55,cy);
+    eg.addColorStop(0,'#1a0a3a');eg.addColorStop(0.3,'#3a1a6a');eg.addColorStop(0.7,'#3a1a6a');eg.addColorStop(1,'#1a0a3a');
+    ctx.fillStyle=eg;ctx.fill();
+    ctx.strokeStyle='#6a3fff';ctx.lineWidth=2;ctx.stroke();
+    ctx.beginPath();ctx.ellipse(cx,cy,52,32,0,0,Math.PI*2);
+    ctx.strokeStyle='rgba(200,160,255,0.3)';ctx.lineWidth=1;ctx.stroke();
+    var iris=16+Math.sin(t*2)*2;
+    var ig=ctx.createRadialGradient(cx,cy,0,cx,cy,iris);
+    ig.addColorStop(0,'#1a0a3a');ig.addColorStop(0.4,'#6a3fff');ig.addColorStop(0.8,'#3a1a9a');ig.addColorStop(1,'#1a0a4a');
+    ctx.beginPath();ctx.arc(cx,cy,iris,0,Math.PI*2);ctx.fillStyle=ig;ctx.fill();
+    var pupil=6+Math.sin(t*1.5)*1;
+    ctx.beginPath();ctx.arc(cx,cy,pupil,0,Math.PI*2);ctx.fillStyle='#0a0510';ctx.fill();
+    ctx.beginPath();ctx.arc(cx-2,cy-2,pupil*0.3,0,Math.PI*2);ctx.fillStyle='rgba(200,160,255,0.4)';ctx.fill();
+    ctx.strokeStyle='rgba(106,63,255,0.4)';ctx.lineWidth=1;
+    for(var i=0;i<6;i++){
+      var a=i/6*Math.PI*2+t*0.3;
+      ctx.beginPath();ctx.moveTo(cx+Math.cos(a)*18,cy+Math.sin(a)*12);
+      ctx.lineTo(cx+Math.cos(a)*52,cy+Math.sin(a)*32);ctx.stroke();
+    }
+    ctx.restore();
+    var shards=8;
+    for(var i=0;i<shards;i++){
+      var a=i/shards*Math.PI*2+t*0.15;
+      var d=65+Math.sin(t+i)*5;
+      var sx=cx+Math.cos(a)*d,sy=cy+Math.sin(a)*d*0.65;
+      ctx.save();ctx.translate(sx,sy);ctx.rotate(a);
+      ctx.fillStyle='rgba(106,63,255,'+(0.15+Math.sin(t+i*2)*0.08)+')';
+      ctx.fillRect(-3,-6,6,12);ctx.restore();
+    }
+  }
+
+  function drawScene(canvasId){
+    var c=document.getElementById(canvasId);
+    if(!c)return null;
+    var ctx=c.getContext('2d');
+    var W,H;
+    function resize(){W=c.width=window.innerWidth;H=c.height=window.innerHeight;}
+    resize();window.addEventListener('resize',resize);
+
+    var fireflies=[];
+    for(var i=0;i<60;i++){
+      fireflies.push({baseX:Math.random()*2000,baseY:100+Math.random()*400,phase:Math.random()*Math.PI*2,speed:0.3+Math.random()*0.8,size:1+Math.random()*2.5});
+    }
+    var dust=[];
+    for(var i=0;i<40;i++){
+      dust.push({x:Math.random()*2000,y:Math.random()*1200,vx:(Math.random()-0.5)*0.15,vy:-Math.random()*0.15-0.02,r:Math.random()*1.5+0.5,a:Math.random()*0.2+0.05,hue:Math.random()>0.5?45:200});
+    }
+    var trees=[];
+    var tx=0;
+    while(tx<2200){
+      trees.push({x:tx,h:60+Math.random()*140,w:8+Math.random()*12,type:Math.random()>0.3?'pine':'oak'});
+      tx+=15+Math.random()*30;
+    }
+    var houses=[];
+    var hx=80;
+    while(hx<2200){
+      houses.push({x:hx,w:25+Math.random()*30,h:20+Math.random()*25,roofH:12+Math.random()*10,lit:Math.random()>0.3,chimney:Math.random()>0.5});
+      hx+=60+Math.random()*80;
+    }
+    var moonPhase=Math.random()*Math.PI*2;
+    var auroraPhase=0;
+
+    function drawTree(tx2,ty,th,tw,type){
+      ctx.fillStyle='#1a2810';
+      if(type==='pine'){
+        for(var i=0;i<4;i++){
+          var ly=ty-i*th*0.22;
+          var lw=tw*(2.2-i*0.4);
+          ctx.beginPath();ctx.moveTo(tx2,ly-th*0.2);ctx.lineTo(tx2-lw,ly);ctx.lineTo(tx2+lw,ly);ctx.closePath();ctx.fill();
+        }
+        ctx.fillRect(tx2-tw*0.15,ty,tw*0.3,th*0.12);
+      } else {
+        ctx.beginPath();ctx.arc(tx2,ty-th*0.45,tw*2,0,Math.PI*2);ctx.fill();
+        ctx.fillRect(tx2-tw*0.15,ty,tw*0.3,th*0.2);
+      }
+    }
+
+    var raf;
+    function draw(){
+      var t=Date.now()*0.001;
+      ctx.clearRect(0,0,W,H);
+
+      var sky=ctx.createLinearGradient(0,0,0,H*0.7);
+      sky.addColorStop(0,'#12122e');sky.addColorStop(0.2,'#181638');
+      sky.addColorStop(0.5,'#1c1835');sky.addColorStop(1,'#141228');
+      ctx.fillStyle=sky;ctx.fillRect(0,0,W,H);
+
+      moonPhase+=0.0003;
+      var moonX=W*0.78+Math.sin(moonPhase)*20;
+      var moonY=H*0.1;
+      ctx.save();
+      ctx.shadowColor='rgba(255,240,200,1)';ctx.shadowBlur=100;
+      ctx.beginPath();ctx.arc(moonX,moonY,32,0,Math.PI*2);
+      var mg=ctx.createRadialGradient(moonX-5,moonY-5,0,moonX,moonY,32);
+      mg.addColorStop(0,'#fffff0');mg.addColorStop(0.3,'#fff8d0');mg.addColorStop(0.7,'#f0e0a0');mg.addColorStop(1,'#d0b870');
+      ctx.fillStyle=mg;ctx.fill();ctx.restore();
+      ctx.beginPath();ctx.arc(moonX+8,moonY-6,27,0,Math.PI*2);ctx.fillStyle='#12122e';ctx.fill();
+      var moonGlow=ctx.createRadialGradient(moonX,moonY,34,moonX,moonY,350);
+      moonGlow.addColorStop(0,'rgba(255,240,180,0.18)');moonGlow.addColorStop(0.3,'rgba(220,210,160,0.08)');moonGlow.addColorStop(0.6,'rgba(180,170,140,0.03)');moonGlow.addColorStop(1,'transparent');
+      ctx.fillStyle=moonGlow;ctx.beginPath();ctx.arc(moonX,moonY,350,0,Math.PI*2);ctx.fill();
+
+      var ambientG=ctx.createRadialGradient(W*0.7,H*0.35,0,W*0.5,H*0.4,W*0.8);
+      ambientG.addColorStop(0,'rgba(100,120,180,0.06)');ambientG.addColorStop(0.5,'rgba(60,80,140,0.03)');ambientG.addColorStop(1,'transparent');
+      ctx.fillStyle=ambientG;ctx.fillRect(0,0,W,H);
+
+      for(var i=0;i<60;i++){
+        var sx=(i*137.5)%W,sy=(i*89.3)%(H*0.3);
+        ctx.fillStyle='rgba(240,230,255,'+(0.45+Math.sin(t*0.8+i*2.3)*0.2)+')';
+        ctx.fillRect(sx,sy,1.8+Math.sin(t+i)*0.5,1.8+Math.sin(t+i)*0.5);
+      }
+
+      auroraPhase+=0.008;
+      ctx.save();ctx.globalAlpha=0.15;
+      for(var i=0;i<6;i++){
+        var ay=H*0.04+i*18+Math.sin(auroraPhase+i*0.5)*12;
+        var ag=ctx.createLinearGradient(0,ay,W,ay);
+        ag.addColorStop(0,'transparent');ag.addColorStop(0.1,'rgba(80,220,140,0.7)');
+        ag.addColorStop(0.3,'rgba(50,180,240,0.8)');ag.addColorStop(0.5,'rgba(140,100,220,0.7)');
+        ag.addColorStop(0.7,'rgba(50,220,160,0.6)');ag.addColorStop(0.9,'rgba(80,180,200,0.5)');ag.addColorStop(1,'transparent');
+        ctx.fillStyle=ag;ctx.fillRect(0,ay-12,W,24);
+      }
+      ctx.restore();
+
+      var mountY=H*0.45;
+      var horizonG=ctx.createLinearGradient(0,mountY-30,0,mountY+40);
+      horizonG.addColorStop(0,'transparent');horizonG.addColorStop(0.3,'rgba(40,50,80,0.06)');horizonG.addColorStop(0.5,'rgba(60,70,100,0.04)');horizonG.addColorStop(1,'transparent');
+      ctx.fillStyle=horizonG;ctx.fillRect(0,mountY-30,W,70);
+
+      var mColors=['#1a1e30','#202438','#282c40'];
+      for(var layer=0;layer<3;layer++){
+        ctx.fillStyle=mColors[layer];
+        ctx.beginPath();ctx.moveTo(-20,mountY+layer*30);
+        for(var mx=-20;mx<W+50;mx+=3){
+          var mh=Math.sin(mx*(0.003+layer*0.002)+layer)*80*(1-layer*0.25)+Math.sin(mx*0.007+layer)*40+Math.sin(mx*0.001+layer*2)*60;
+          ctx.lineTo(mx,mountY+layer*30-mh);
+        }
+        ctx.lineTo(W+50,H);ctx.lineTo(-20,H);ctx.closePath();ctx.fill();
+      }
+
+      var castleX=W*0.35;
+      var castleY=mountY+60-Math.sin(castleX*0.005+3)*40-Math.sin(castleX*0.01+1)*20-Math.sin(castleX*0.003)*50-30;
+      ctx.fillStyle='#1a1e2a';
+      ctx.fillRect(castleX-25,castleY,50,80);
+      ctx.fillRect(castleX-35,castleY-10,12,90);
+      ctx.fillRect(castleX+23,castleY-10,12,90);
+      ctx.fillRect(castleX-8,castleY-40,16,50);
+      ctx.beginPath();ctx.moveTo(castleX-8,castleY-40);ctx.lineTo(castleX,castleY-55);ctx.lineTo(castleX+8,castleY-40);ctx.closePath();ctx.fill();
+      ctx.beginPath();ctx.moveTo(castleX-35,castleY-10);ctx.lineTo(castleX-29,castleY-22);ctx.lineTo(castleX-23,castleY-10);ctx.closePath();ctx.fill();
+      ctx.beginPath();ctx.moveTo(castleX+23,castleY-10);ctx.lineTo(castleX+29,castleY-22);ctx.lineTo(castleX+35,castleY-10);ctx.closePath();ctx.fill();
+      for(var ci=0;ci<3;ci++){
+        var wa=0.7+Math.sin(t*1.5+ci)*0.2;
+        ctx.fillStyle='rgba(255,220,100,'+wa+')';ctx.fillRect(castleX-15+ci*15,castleY+20+ci*10,5,7);
+        ctx.fillStyle='rgba(255,220,100,'+(wa*0.2)+')';ctx.fillRect(castleX-17+ci*15,castleY+18+ci*10,9,11);
+      }
+
+      var groundY=H*0.7;
+      var grassG=ctx.createLinearGradient(0,groundY,0,H);
+      grassG.addColorStop(0,'#1e2818');grassG.addColorStop(0.3,'#1a2210');grassG.addColorStop(1,'#141c0c');
+      ctx.fillStyle=grassG;ctx.fillRect(0,groundY,W,H-groundY);
+
+      ctx.fillStyle='#1a2414';
+      ctx.beginPath();ctx.moveTo(-20,groundY+10);
+      for(var hx2=-20;hx2<W+50;hx2+=4){ctx.lineTo(hx2,groundY-10+Math.sin(hx2*0.006)*15+Math.sin(hx2*0.015)*8);}
+      ctx.lineTo(W+50,H);ctx.lineTo(-20,H);ctx.closePath();ctx.fill();
+
+      trees.forEach(function(tr){drawTree(tr.x,groundY-Math.sin(tr.x*0.006)*15+8,tr.h,tr.w,tr.type);});
+
+      houses.forEach(function(h){
+        var hBase=groundY-Math.sin(h.x*0.006)*15+5;
+        ctx.fillStyle='#1a1c14';ctx.fillRect(h.x,hBase-h.h,h.w,h.h);
+        ctx.fillStyle='#201c18';ctx.beginPath();
+        ctx.moveTo(h.x-4,hBase-h.h);ctx.lineTo(h.x+h.w*0.5,hBase-h.h-h.roofH);ctx.lineTo(h.x+h.w+4,hBase-h.h);ctx.closePath();ctx.fill();
+        if(h.lit){
+          var wa=0.8+Math.sin(t*2+h.x)*0.15;
+          ctx.fillStyle='rgba(255,200,70,'+wa+')';ctx.fillRect(h.x+h.w*0.3,hBase-h.h*0.5,6,8);
+          ctx.fillStyle='rgba(255,200,70,'+(wa*0.2)+')';ctx.fillRect(h.x+h.w*0.3-4,hBase-h.h*0.5-4,14,16);
+        }
+        if(h.chimney){
+          ctx.fillStyle='#1a1c14';ctx.fillRect(h.x+h.w*0.7,hBase-h.h-h.roofH-8,5,12);
+          for(var si=0;si<3;si++){
+            var sy2=hBase-h.h-h.roofH-10-si*8+Math.sin(t*0.8+h.x+si)*3;
+            ctx.beginPath();ctx.arc(h.x+h.w*0.7+2.5+Math.sin(t*0.5+si)*4,sy2,3+si*2,0,Math.PI*2);
+            ctx.fillStyle='rgba(80,80,100,'+(0.12-si*0.03)+')';ctx.fill();
+          }
+        }
+      });
+
+      ctx.fillStyle='rgba(255,200,80,0.08)';ctx.beginPath();ctx.arc(W*0.5,groundY-20,250,0,Math.PI*2);ctx.fill();
+
+      var pathY=groundY+5;
+      ctx.strokeStyle='rgba(110,100,70,0.2)';ctx.lineWidth=20;
+      ctx.beginPath();ctx.moveTo(0,pathY+10);ctx.quadraticCurveTo(W*0.3,pathY-5,W*0.5,pathY+8);ctx.quadraticCurveTo(W*0.7,pathY+20,W,pathY+5);ctx.stroke();
+      ctx.strokeStyle='rgba(130,120,80,0.12)';ctx.lineWidth=14;
+      ctx.beginPath();ctx.moveTo(0,pathY+10);ctx.quadraticCurveTo(W*0.3,pathY-5,W*0.5,pathY+8);ctx.quadraticCurveTo(W*0.7,pathY+20,W,pathY+5);ctx.stroke();
+
+      fireflies.forEach(function(f){
+        f.phase+=f.speed*0.02;
+        var fx=f.baseX+Math.sin(f.phase)*40+Math.sin(f.phase*0.7)*20;
+        var fy=f.baseY+Math.cos(f.phase*0.8)*25+Math.sin(f.phase*0.5)*15;
+        var fa=0.5+Math.sin(f.phase*2)*0.3;
+        ctx.save();ctx.shadowColor='rgba(220,255,140,1)';ctx.shadowBlur=22;
+        ctx.beginPath();ctx.arc(fx,fy,f.size*1.2,0,Math.PI*2);ctx.fillStyle='rgba(240,255,160,'+fa+')';ctx.fill();
+        ctx.restore();
+        ctx.beginPath();ctx.arc(fx,fy,f.size*5,0,Math.PI*2);ctx.fillStyle='rgba(220,250,120,'+(fa*0.12)+')';ctx.fill();
+      });
+
+      dust.forEach(function(p){
+        p.x+=p.vx;p.y+=p.vy;
+        if(p.y<-10){p.y=H+10;p.x=Math.random()*W;}
+        if(p.x<-10)p.x=W+10;if(p.x>W+10)p.x=-10;
+        ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+        ctx.fillStyle='hsla('+p.hue+',40%,60%,'+(p.a*(0.5+Math.sin(t+p.x*0.01)*0.5))+')';ctx.fill();
+      });
+
+      for(var mi=0;mi<4;mi++){
+        var mOff=Math.sin(t*0.1+mi*2)*80;
+        var mX=W*0.2+mi*W*0.2+mOff;
+        var mG=ctx.createRadialGradient(mX,groundY+10,0,mX,groundY+10,120);
+        mG.addColorStop(0,'rgba(15,20,25,0.06)');mG.addColorStop(1,'transparent');
+        ctx.fillStyle=mG;ctx.beginPath();ctx.arc(mX,groundY+10,120,0,Math.PI*2);ctx.fill();
+      }
+
+      var fogG=ctx.createLinearGradient(0,groundY+20,0,H);
+      fogG.addColorStop(0,'transparent');fogG.addColorStop(1,'rgba(14,18,14,0.3)');
+      ctx.fillStyle=fogG;ctx.fillRect(0,groundY+20,W,H-groundY-20);
+
+      raf=requestAnimationFrame(draw);
+    }
+    draw();
+    return{destroy:function(){cancelAnimationFrame(raf);}};
+  }
+
+  window._scene1=drawScene('sceneCanvas');
+  window._logoAnim=setInterval(function(){
+    var lc=document.getElementById('logoCanvas');
+    if(lc)drawLogo(lc);
+  },50);
+
+  var ts=document.getElementById('titleScreen');
+  if(ts){
+    new MutationObserver(function(muts){
+      muts.forEach(function(m){
+        if(m.attributeName==='style'&&ts.style.display!=='none'&&!window._scene2){
+          window._scene2=drawScene('sceneCanvas2');
+        }
+      });
+    }).observe(ts,{attributes:true});
+  }
+})();
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="js/sprites.js"></script>
+<script src="js/data.js"></script>
+<script src="js/renderer3d.js"></script>
+<script src="js/engine.js"></script>
+</body>
+</html>
