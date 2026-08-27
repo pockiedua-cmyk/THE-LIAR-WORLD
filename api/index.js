@@ -1,4 +1,4 @@
-// THE LIAR WORLD - API Server (Placeholder)
+// Veil of Lies - API Server (Placeholder)
 // Future: Online ranking, multiplayer saves, cloud sync
 
 const http = require('http');
@@ -26,5 +26,5 @@ const server = http.createServer((req, res) => {
 });
 
 server.listen(PORT, () => {
-  console.log(`THE LIAR WORLD API running on port ${PORT}`);
+  console.log(`Veil of Lies API running on port ${PORT}`);
 });
