@@ -485,6 +485,10 @@ function openDlg(npcId,text,choices){
       };
       cc.appendChild(b);
     });
+    if(!cc.querySelector('.ch:not(.lk)')){
+      const lv=document.createElement('button');lv.className='ch';lv.textContent='[Leave]';
+      lv.onclick=closeDlg;cc.appendChild(lv);
+    }
   } else {
     const b=document.createElement('button');b.className='ch';b.textContent='[Continue]';
     b.onclick=closeDlg;cc.appendChild(b);
@@ -911,7 +915,8 @@ document.addEventListener('keydown',e=>{
   }
   if(k==='escape'){
     e.preventDefault();
-    if(ST.phase==='explore')UI.openMn();
+    if(ST.phase==='dialogue')closeDlg();
+    else if(ST.phase==='explore')UI.openMn();
     else if(document.getElementById('mn').style.display==='flex')UI.closeMn();
     else if(document.getElementById('ev').style.display==='block')UI.closeEv();
     else if(document.getElementById('inv').style.display==='block')UI.closeInv();
