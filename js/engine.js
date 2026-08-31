@@ -85,6 +85,15 @@ function uHUD(){
   if(gW)gW.textContent=(p.gear&&p.gear.wp)?p.gear.wp.nm+' (+'+((ITEM_DEFS[p.gear.wp.id]&&ITEM_DEFS[p.gear.wp.id].wp)||0)+')':'None';
   const gA=document.getElementById('sAr');
   if(gA)gA.textContent=(p.gear&&p.gear.ar)?p.gear.ar.nm+' (+'+((ITEM_DEFS[p.gear.ar.id]&&ITEM_DEFS[p.gear.ar.id].df)||0)+')':'None';
+  const sb=document.getElementById('sSet');
+  if(sb){
+    const setB=(typeof _CF!=='undefined'?_CF.getSetBonus(p):null);
+    if(setB&&(setB.hp||setB.atk||setB.def||setB.mag||setB.spd)){
+      let names=[];if(setB.hp)names.push('HP+'+setB.hp);if(setB.def)names.push('DEF+'+setB.def);if(setB.atk)names.push('ATK+'+setB.atk);if(setB.mag)names.push('MAG+'+setB.mag);if(setB.spd)names.push('SPD+'+setB.spd);
+      sb.textContent='Set: '+names.join(' ');
+      sb.style.display='block';
+    }else sb.style.display='none';
+  }
   const m=getMap();
   document.getElementById('ln').textContent=m?m.name:'Unknown';
   const obj=document.getElementById('obj');
@@ -792,7 +801,7 @@ function updateCombat(){
 function flightAttempt(){
   const cs=ST.cs;if(!cs||!cs.pTurn)return;
   const p=ST.p;
-  let chance=55+p.spd*3;
+  let chance=55+p.spd*3+(typeof _CF!=='undefined'?_CF.getSetBonus(p).spd*3:0);
   if(Math.random()*100<chance){
     cs.log.push({t:'You escaped.',c:'nf'});
     Snd.flee();
@@ -857,7 +866,7 @@ function pAction(sk){
   }
   let dmg=0;
     if(sk==='Attack'){
-    dmg=Math.max(1,p.atk+Math.floor(Math.random()*5)-e.df/2|0);
+    dmg=Math.max(1,p.atk+Math.floor(Math.random()*5)-e.df/2|0)+(typeof _CF!=='undefined'?_CF.getSetBonus(p).atk:0);
     if(cs.falseShow){dmg=Math.ceil(dmg*2);cs.log.push({t:'Truth sears the false form! Attack x2!',c:'hl'});}
     e.curHp-=dmg;
     if(dmg>=20)hitStop(60);else hitStop(25);
@@ -867,7 +876,7 @@ function pAction(sk){
   } else if(sk==='Magic Blast'){
     if(p.mp<10){cs.log.push({t:'Not enough MP!',c:'nf'});updateCombat();return;}
     p.mp-=10;
-    dmg=Math.max(1,p.mag*2+Math.floor(Math.random()*8));
+    dmg=Math.max(1,p.mag*2+Math.floor(Math.random()*8))+(typeof _CF!=='undefined'?_CF.getSetBonus(p).mag:0);
     if(cs.falseShow){dmg=Math.ceil(dmg*2);cs.log.push({t:'Aura of truth! Magic Blast x2!',c:'hl'});}
     e.curHp-=dmg;
     if(dmg>=26)hitStop(70);else hitStop(30);

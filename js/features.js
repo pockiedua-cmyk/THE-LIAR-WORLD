@@ -185,7 +185,7 @@ function closeFeats(){
 
 function renderFeatTabs(cat){
   const pb=document.getElementById('ftTabs');pb.innerHTML='';
-  [{id:'ach',l:'ACHIEVEMENTS'},{id:'stats',l:'STATISTICS'},{id:'best',l:'BESTIARY'},{id:'rums',l:'RUMOURS'}].forEach(t=>{
+  [{id:'ach',l:'ACHIEVEMENTS'},{id:'stats',l:'STATISTICS'},{id:'best',l:'BESTIARY'},{id:'rums',l:'RUMOURS'},{id:'jnl',l:'JOURNAL'}].forEach(t=>{
     const b=document.createElement('button');
     b.className='btn btn-sm';if(t.id===cat)b.style.borderColor='#ffaa00';
     b.textContent=t.l;b.onclick=()=>renderFeatTabs(t.id);pb.appendChild(b);
@@ -193,7 +193,38 @@ function renderFeatTabs(cat){
   if(cat==='ach')renderAch();
   else if(cat==='stats')renderStats();
   else if(cat==='rums')renderRums();
+  else if(cat==='jnl')renderFeatJournal();
   else renderBest();
+}
+
+function renderFeatJournal(){
+  const b=document.getElementById('ftBody');if(!b)return;
+  const p=ST.p;if(!p){b.innerHTML='';return;}
+  b.innerHTML='';
+  const tabs=document.createElement('div');tabs.style.cssText='display:flex;gap:4px;flex-wrap:wrap;margin:8px 0;';
+  const cats=[{id:null,l:'ALL'},{id:'combat',l:'COMBAT'},{id:'story',l:'STORY'},{id:'world',l:'WORLD'}];
+  const cur=p._jnlTab||null;
+  cats.forEach(c=>{
+    const btn=document.createElement('button');btn.className='btn btn-sm';
+    if(c.id===cur)btn.style.borderColor='#ffaa00';
+    btn.textContent=c.l;
+    btn.onclick=()=>{p._jnlTab=c.id;renderFeatJournal();};
+    tabs.appendChild(btn);
+  });
+  b.appendChild(tabs);
+  let list=(p.jnl||[]).slice().reverse();
+  if(cur)list=list.filter(e=>e.cat===cur);
+  if(!list.length){const d=document.createElement('div');d.style.cssText='padding:16px;color:#6a6a8a';d.textContent='No journal entries yet.';b.appendChild(d);return;}
+  const g=document.createElement('div');g.className='bgr';
+  const catCol={combat:'#ff6644',story:'#ffd966',world:'#66ccff'};
+  list.forEach(e=>{
+    const d=document.createElement('div');d.className='bgr-i';
+    const t=new Date(e.ts);
+    const ts=t.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+    d.innerHTML='<span style="color:'+(catCol[e.cat]||'#b0a8c0')+';min-width:44px;flex:0 0 auto">'+ts+'</span><span style="flex:1">'+e.txt+'</span>';
+    g.appendChild(d);
+  });
+  b.appendChild(g);
 }
 
 function shopItemsFor(npcId){
