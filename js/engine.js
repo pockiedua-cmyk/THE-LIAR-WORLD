@@ -4,7 +4,7 @@ function initMinimap(){
   if(mm){mm.width=140;mm.height=140;mmx=mm.getContext('2d');}
 }
 
-const ST={phase:'title',p:null,cam:{x:0,y:0},keys:{},mt:0,md:140,gt:0,dt:0,eyeOn:false,cs:null,npc:null,dlgNode:null,dlgNPC:null,lastT:0,particles:[],walkFrame:0,transitioning:false,fadePhase:'none',fadeTimer:0,fadeCallback:null,shakeX:0,shakeY:0,shakeTimer:0,shakeIntensity:0,combatFx:[],attackFlash:0,isMoving:false,camAngle:0,camAngleTarget:0,camLerp:0,_camFrom:0,_camUnwrap:0,renderPX:12,renderPY:18,renderNX:12,renderNY:18,moveT:0,moveDur:140,nearestNPC:null,nearestObj:null};
+const ST={phase:'title',p:null,cam:{x:0,y:0},keys:{},mt:0,md:140,gt:0,dt:0,eyeOn:false,cs:null,npc:null,dlgNode:null,dlgNPC:null,lastT:0,particles:[],walkFrame:0,transitioning:false,fadePhase:'none',fadeTimer:0,fadeCallback:null,shakeX:0,shakeY:0,shakeTimer:0,shakeIntensity:0,combatFx:[],attackFlash:0,isMoving:false,camAngle:0,camAngleTarget:0,camLerp:0,_camFrom:0,_camUnwrap:0,renderPX:12,renderPY:18,renderNX:12,renderNY:18,moveT:0,moveDur:140,nearestNPC:null,nearestObj:null,hitStop:0};
 const GD={};const DLG={};
 
 function gridToScreen(gx,gy){
@@ -856,10 +856,11 @@ function pAction(sk){
     handleCombatFall();return;
   }
   let dmg=0;
-  if(sk==='Attack'){
+    if(sk==='Attack'){
     dmg=Math.max(1,p.atk+Math.floor(Math.random()*5)-e.df/2|0);
     if(cs.falseShow){dmg=Math.ceil(dmg*2);cs.log.push({t:'Truth sears the false form! Attack x2!',c:'hl'});}
     e.curHp-=dmg;
+    if(dmg>=20)hitStop(60);else hitStop(25);
     cs.log.push({t:`You attack for ${dmg} damage!`,c:'dm'});
     addCombatFx('-'+dmg,'#ff6644',window.innerWidth/2+30,window.innerHeight*0.28);ST.attackFlash=200;triggerShake(4);
     enemyFlash();combatFlash();Snd.hit();
@@ -869,6 +870,7 @@ function pAction(sk){
     dmg=Math.max(1,p.mag*2+Math.floor(Math.random()*8));
     if(cs.falseShow){dmg=Math.ceil(dmg*2);cs.log.push({t:'Aura of truth! Magic Blast x2!',c:'hl'});}
     e.curHp-=dmg;
+    if(dmg>=26)hitStop(70);else hitStop(30);
     cs.log.push({t:`Magic Blast hits for ${dmg}!`,c:'dm'});
     addCombatFx('-'+dmg,'#66aaff',window.innerWidth/2+30,window.innerHeight*0.28);ST.attackFlash=300;triggerShake(6);
     enemyFlash();combatFlash();Snd.cast();
@@ -891,14 +893,15 @@ function pAction(sk){
       cs.masked=false;
       cs.falseShow=true;
       p.stat.masks=(p.stat.masks||0)+1;
-      cs.log.push({t:'The mask shatters! '+e.tw2+' sloughs away, revealing the TRUE form!',c:'nf'});
-      cs.log.push({t:'Its defenses are broken \u2014 a moment of truth!',c:'hl'});
+      cs.log.push({t:'The mask shatters! '+e.tw2+' sloughs away, revealing the TRUE form!',c:'nf'});      cs.log.push({t:'Its defenses are broken \u2014 a moment of truth!',c:'hl'});
       triggerShake(8);
       document.getElementById('eo').style.display='block';
       Snd.eye();combatFlash();triggerShake(6);
       setTimeout(()=>{document.getElementById('eo').style.display='none';},1000);
       const nm2=e.tw2||('the truth of '+e.nm);
       cs.log.push({t:'True form: '+nm2+'! Bonus damage until you are dealt a heavy blow.',c:'nf'});
+      hitStop(140);
+      if(typeof _CF!=='undefined')_CF.journalAdd('combat','Shattered '+e.nm+'\'s mask, revealing its true form.');
       if(!hasF('mask_empty'))setF('mask_empty');
       if(typeof checkAch==='function')checkAch();
     } else if(e.tw){
@@ -923,6 +926,7 @@ function pAction(sk){
       document.getElementById('cm').style.display='none';
       ST.phase='explore';ST.cs=null;
       Snd.win();
+      if(typeof _CF!=='undefined')_CF.journalAdd('combat','Defeated '+e.nm+'.');
       gxp(e.xp||20);
       if(e.gld){ST.p.gold+=e.gld;notify('+'+e.gld+' gold');}
       if(e.pz&&Math.random()<0.12){addItem({id:'hpotion',nm:'Health Potion',icon:'\u25A6',desc:'Restores 30 HP'});}
@@ -941,6 +945,7 @@ function pAction(sk){
 
 function eTurn(){
   const cs=ST.cs;if(!cs)return;
+  if(typeof _CF!=='undefined'&&typeof _CF.eTell==='function'){_CF.eTell();return;}
   const e=cs.e,p=ST.p;
   const atks=e.atk||[{nm:'Attack',pw:e.at}];
   const at=atks[Math.floor(Math.random()*atks.length)];
@@ -1237,8 +1242,10 @@ document.addEventListener('keyup',e=>{
 let lastFrame=0;
 function gameLoop(ts){
   ST.dt=ts-lastFrame;lastFrame=ts;
+  if(ST.hitStop>0){ST.hitStop-=ST.dt;requestAnimationFrame(gameLoop);return;}
   if(ST.attackFlash>0)ST.attackFlash-=ST.dt;
   updateCombatFx(ST.dt);
+  if(ST.cs&&typeof _CF!=='undefined')_CF.updateStatusIcons();
   if(ST.phase==='explore'&&ST.p){
     if(!ST.p.stat)ST.p.stat={kills:{},battles:0,deaths:0,evPick:0,buys:0,sells:0,pots:0,theories:0,steps:0,playMs:0};
     ST.p.stat.playMs=(ST.p.stat.playMs||0)+ST.dt;
