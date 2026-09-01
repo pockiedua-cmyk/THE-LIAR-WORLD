@@ -1498,3 +1498,9 @@ body.txt-lg #dT{font-size:17px;line-height:1.45}
 .obj-new{animation:objPulse 1.3s ease-in-out 2;background:rgba(255,224,102,0.12);border:1px solid #ffe066;border-radius:6px;}
 @keyframes objPulse{0%,100%{transform:scale(1);box-shadow:0 0 0 transparent}50%{transform:scale(1.02);box-shadow:0 0 14px rgba(255,224,102,0.45)}}
 .hud-help{pointer-events:auto;}
+
+/* user info below day/night clock inside HUD */
+#hud .user-info{position:static;background:none;border:none;padding:2px 0;margin:2px 0;display:none;pointer-events:auto;font-size:9px;}
+#hud .user-info .ui-name{color:#c8a0ff;font-size:10px;}
+#hud .user-info .ui-logout{color:#ff6a6a;cursor:pointer;margin-left:6px;}
+#hud .user-info .ui-logout:hover{text-decoration:underline;}
