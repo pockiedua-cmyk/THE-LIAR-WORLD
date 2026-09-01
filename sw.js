@@ -1,4 +1,4 @@
-const CACHE = 'veil-of-lies-v20';
+const CACHE = 'veil-of-lies-v21';
 const CORE = [
   './index.html',
   './css/style.css',
