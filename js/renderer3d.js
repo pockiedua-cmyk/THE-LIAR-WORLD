@@ -1126,6 +1126,47 @@ const R3D=(function(){
         const rung=new THREE.Mesh(new THREE.CylinderGeometry(0.008,0.008,0.15,4),new THREE.MeshStandardMaterial({color:lightWood}));
         rung.rotation.z=Math.PI/2;rung.position.set(0,0.08+i*0.12,0);g.add(rung);
       }
+    } else if(id==='board1'){
+      const postL=new THREE.Mesh(new THREE.CylinderGeometry(0.02,0.02,0.55,6),new THREE.MeshStandardMaterial({color:darkWood}));
+      postL.position.set(-0.18,0.27,0);g.add(postL);
+      const postR=new THREE.Mesh(new THREE.CylinderGeometry(0.02,0.02,0.55,6),new THREE.MeshStandardMaterial({color:darkWood}));
+      postR.position.set(0.18,0.27,0);g.add(postR);
+      const board=new THREE.Mesh(new THREE.BoxGeometry(0.48,0.38,0.03),new THREE.MeshStandardMaterial({color:lightWood,roughness:0.6}));
+      board.position.set(0,0.32,0.02);g.add(board);
+      for(let i=0;i<3;i++){
+        const paper=new THREE.Mesh(new THREE.PlaneGeometry(0.1,0.13),new THREE.MeshStandardMaterial({color:paper,side:THREE.DoubleSide}));
+        paper.position.set((i-1)*0.13,0.32,0.045);paper.rotation.y=0.02;g.add(paper);
+        const pin=new THREE.Mesh(new THREE.SphereGeometry(0.008,4,4),new THREE.MeshStandardMaterial({color:0xcc2222}));
+        pin.position.set((i-1)*0.13,0.38,0.05);g.add(pin);
+      }
+      const hdr=new THREE.Mesh(new THREE.BoxGeometry(0.35,0.04,0.01),new THREE.MeshStandardMaterial({color:0x8a6a2a}));
+      hdr.position.set(0,0.52,0.03);g.add(hdr);
+    } else if(id==='anvil1'){
+      const stump=new THREE.Mesh(new THREE.CylinderGeometry(0.14,0.15,0.28,8),new THREE.MeshStandardMaterial({color:darkWood,roughness:0.8}));
+      stump.position.y=0.14;g.add(stump);
+      const base=new THREE.Mesh(new THREE.BoxGeometry(0.22,0.06,0.14),new THREE.MeshStandardMaterial({color:iron,metalness:0.6,roughness:0.4}));
+      base.position.y=0.31;g.add(base);
+      const top=new THREE.Mesh(new THREE.BoxGeometry(0.26,0.05,0.16),new THREE.MeshStandardMaterial({color:iron,metalness:0.7,roughness:0.3}));
+      top.position.y=0.36;g.add(top);
+      const horn=new THREE.Mesh(new THREE.ConeGeometry(0.05,0.12,6),new THREE.MeshStandardMaterial({color:iron,metalness:0.6}));
+      horn.position.set(0.18,0.36,0);horn.rotation.z=-Math.PI/2;g.add(horn);
+      const hammerH=new THREE.Mesh(new THREE.CylinderGeometry(0.012,0.01,0.22,5),new THREE.MeshStandardMaterial({color:darkWood}));
+      hammerH.position.set(-0.18,0.3,0.08);hammerH.rotation.z=0.3;g.add(hammerH);
+      const hammerHead=new THREE.Mesh(new THREE.BoxGeometry(0.08,0.04,0.03),new THREE.MeshStandardMaterial({color:iron,metalness:0.6}));
+      hammerHead.position.set(-0.18,0.42,0.08);g.add(hammerHead);
+    } else if(id==='inn1'){
+      const base=new THREE.Mesh(new THREE.BoxGeometry(0.55,0.35,0.45),new THREE.MeshStandardMaterial({color:0xd8c8a0,roughness:0.9}));
+      base.position.y=0.18;g.add(base);
+      const roof=new THREE.Mesh(new THREE.ConeGeometry(0.38,0.22,4),new THREE.MeshStandardMaterial({color:0x6a4a2a,roughness:0.7}));
+      roof.position.y=0.46;roof.rotation.y=Math.PI/4;g.add(roof);
+      const door=new THREE.Mesh(new THREE.BoxGeometry(0.12,0.2,0.02),new THREE.MeshStandardMaterial({color:0x4a3018}));
+      door.position.set(0,0.1,0.23);g.add(door);
+      const sign=new THREE.Mesh(new THREE.BoxGeometry(0.18,0.08,0.02),new THREE.MeshStandardMaterial({color:lightWood}));
+      sign.position.set(0,0.32,0.24);g.add(sign);
+      const bed1=new THREE.Mesh(new THREE.BoxGeometry(0.18,0.06,0.12),new THREE.MeshStandardMaterial({color:cloth}));
+      bed1.position.set(0.15,0.05,0);g.add(bed1);
+      const pillow=new THREE.Mesh(new THREE.BoxGeometry(0.08,0.03,0.08),new THREE.MeshStandardMaterial({color:0xffffff}));
+      pillow.position.set(0.15,0.09,0.06);g.add(pillow);
     } else {
       const marker=new THREE.Mesh(new THREE.SphereGeometry(0.08,8,6),new THREE.MeshStandardMaterial({color:0xddaa22,emissive:0xaa8800,emissiveIntensity:0.3}));
       marker.position.y=0.15;g.add(marker);
