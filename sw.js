@@ -1,4 +1,4 @@
-const CACHE = 'veil-of-lies-v16';
+const CACHE = 'veil-of-lies-v17';
 const CORE = [
   './index.html',
   './css/style.css',
@@ -12,6 +12,7 @@ const CORE = [
   './js/craft.js',
   './js/daynight.js',
   './js/tutorial.js',
+  './js/cutscene.js',
   './js/data.js',
   './js/sprites.js',
   './js/renderer3d.js',

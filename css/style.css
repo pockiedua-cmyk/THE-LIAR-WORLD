@@ -1507,3 +1507,10 @@ body.txt-lg #dT{font-size:17px;line-height:1.45}
 /* HUD objective more prominent after NPC */
 #hud .obj{background:rgba(20,10,40,0.92);border:1px solid #ffe066;border-radius:6px;padding:4px 8px;font-size:11px;font-weight:700;max-width:260px;box-shadow:0 0 10px rgba(255,224,102,0.25);}
 #hud .obj:empty{display:none!important;}
+
+/* cutscene */
+#cut{position:fixed;inset:0;z-index:260;background:radial-gradient(ellipse at center, rgba(20,10,40,0.96) 0%, rgba(8,4,18,0.98) 100%);display:none;align-items:center;justify-content:center;padding:24px;}
+.cut-card{max-width:560px;width:100%;background:linear-gradient(180deg,#1a1030 0%,#0f0a22 100%);border:1px solid #ffcc44;border-radius:12px;padding:28px 24px;text-align:center;box-shadow:0 0 40px rgba(255,204,68,0.2);}
+.cut-card h2{color:#ffd966;font-size:22px;letter-spacing:1px;margin-bottom:6px;}
+.cut-ty{color:#8a7ab8;font-size:11px;letter-spacing:1px;margin-bottom:14px;}
+.cut-card p{color:#d0c8e8;font-size:13px;line-height:1.6;margin-bottom:18px;}

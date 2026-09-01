@@ -419,7 +419,7 @@ returnToTitle(){
   document.getElementById('loginScreen').style.display='none';
   document.getElementById('userInfo').style.display='none';
   showUI(false);
-  ['mn','cm','dlg','ev','inv','ql','rk','hp','es','sh','ft','bt','cr','tut'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='none';});
+  ['mn','cm','dlg','ev','inv','ql','rk','hp','es','sh','ft','bt','cr','tut','cut'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='none';});
   if(LoginUI.currentUser){
     document.getElementById('titleScreen').style.display='flex';
     document.getElementById('userInfo').style.display='block';
@@ -627,6 +627,10 @@ function openDlg(npcId,text,choices){
       b.innerHTML=label;
       if((ch.ev&&!hasEv(ch.ev))||(ch.req&&!ST.p.flags[ch.req])||(ch.reqev&&!hasEv(ch.reqev))||(ch.present&&!hasEv(ch.present)))b.classList.add('lk');
       else b.onclick=()=>{
+        if(ch.opt&&ch.opt.startsWith('ending_')){
+          if(typeof _CS!=='undefined'&&_CS.playEnding){_CS.playEnding(ch.opt);}else if(typeof G!=='undefined'&&G.triggerEnding)G.triggerEnding(ch.opt,ch.opt,'',ch.text);
+          closeDlg();return;
+        }
         if(ch.onpick){ch.onpick();return;}
         if(ch.ev)addEv(ch.ev,ch.ev.replace(/_/g,' '),ch.desc||'Evidence collected.',getNPCName(npcId),'npc');
         if(ch.present&&hasEv(ch.present)){Snd.evi();if(typeof _CF!=='undefined')_CF.journalAdd('story','Presented '+ch.present.replace(/_/g,' ')+' to '+npcId);}
@@ -1015,7 +1019,7 @@ function pAction(sk){
       if(_mat&&Math.random()<0.35&&ITEM_DEFS[_mat]){addItem({...ITEM_DEFS[_mat]});}
       else if(!_mat&&Math.random()<0.12&&ITEM_DEFS['iron_scrap']){addItem({...ITEM_DEFS['iron_scrap']});}
       if(e.ev&&e.ev.id){addEv(e.ev.id,e.ev.t,e.ev.d,e.ev.s,e.ev.type||'physical');}
-      if(e.boss){ST.p.bd.push(e.nm);notify('Boss Defeated: '+e.nm);}
+      if(e.boss){ST.p.bd.push(e.nm);notify('Boss Defeated: '+e.nm);if(typeof _CS!=='undefined'){if(e.nm==='Root Beast')setTimeout(()=>_CS.play('root_beast'),1400);if(e.nm==='The First Liar')setTimeout(()=>_CS.play('first_liar'),1400);}}
       ST.p.bd=[...new Set(ST.p.bd||[])];
       ST.p.stat.kills[e.nm]=(ST.p.stat.kills[e.nm]||0)+1;
       if(typeof _BT!=='undefined'&&_BT.checkBounty)_BT.checkBounty();
@@ -1246,7 +1250,7 @@ function update(){
 }
 
 function isPanelOpen(){
-  return ['mn','ev','inv','ql','rk','hp','sh','ft','bt','cr','tut'].some(id=>{
+  return ['mn','ev','inv','ql','rk','hp','sh','ft','bt','cr','tut','cut'].some(id=>{
     const el=document.getElementById(id);
     return el&&(el.style.display==='flex'||el.style.display==='block');
   });
@@ -1272,6 +1276,7 @@ document.addEventListener('keydown',e=>{
     else if(document.getElementById('bt').style.display==='block')UI.closeBounty();
     else if(document.getElementById('cr').style.display==='block')UI.closeCraft();
     else if(document.getElementById('tut').style.display==='flex')Tut.close();
+    else if(document.getElementById('cut').style.display==='flex')Cut.close();
     else if(document.getElementById('mn').style.display==='flex')UI.closeMn();
     else if(ST.phase==='explore')UI.openMn();
   }
