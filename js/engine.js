@@ -144,11 +144,13 @@ function startQ(id,name,desc,opts){
     ST.p.fq[id]={name,desc,st:'active'};
     if(ST.dlgNPC)ST.p.fq[id].giver=ST.dlgNPC;
     if(opts&&opts.tgt)ST.p.fq[id].tgt=opts.tgt;
-    notify('Quest: '+name);
+    notify('Quest: '+name+' — lihat [Q] & ikut ◆ di minimap');
     Snd.hud();
+    const o=document.getElementById('obj');if(o){o.classList.add('obj-new');setTimeout(()=>o.classList.remove('obj-new'),2600);}
+    if(typeof _CF!=='undefined'&&_CF.journalAdd)_CF.journalAdd('story','Quest: '+name);
   }
 }
-function completeQ(id){if(ST.p.fq[id]){ST.p.fq[id].st='done';notify('Complete: '+ST.p.fq[id].name);Snd.ach();if(typeof rumourTick==='function')rumourTick(2);if(typeof checkAch==='function')checkAch();}}
+function completeQ(id){if(ST.p.fq[id]){ST.p.fq[id].st='done';notify('✓ Selesai: '+ST.p.fq[id].name+' — kembali ke Quest [Q]');showBanner('QUEST COMPLETE',ST.p.fq[id].name);Snd.ach();if(typeof rumourTick==='function')rumourTick(2);if(typeof checkAch==='function')checkAch();if(typeof _CF!=='undefined'&&_CF.journalAdd)_CF.journalAdd('story','Selesai: '+ST.p.fq[id].name);}}
 function failQ(id){if(ST.p.fq[id])ST.p.fq[id].st='failed';}
 
 function teleport(reg,map,x,y){
@@ -385,6 +387,7 @@ startNewGame(){
     localStorage.setItem('tlw_seenHelp','1');
     setTimeout(()=>UI.openHelp(),1600);
   }
+  setTimeout(()=>{if(typeof Tut!=='undefined'&&Tut.start)Tut.start();},900);
 },
 loadGame(){
   const s=localStorage.getItem(LoginUI.getSaveKey());
@@ -416,7 +419,7 @@ returnToTitle(){
   document.getElementById('loginScreen').style.display='none';
   document.getElementById('userInfo').style.display='none';
   showUI(false);
-  ['mn','cm','dlg','ev','inv','ql','rk','hp','es','sh','ft'].forEach(id=>{document.getElementById(id).style.display='none';});
+  ['mn','cm','dlg','ev','inv','ql','rk','hp','es','sh','ft','bt','cr','tut'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='none';});
   if(LoginUI.currentUser){
     document.getElementById('titleScreen').style.display='flex';
     document.getElementById('userInfo').style.display='block';

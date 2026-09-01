@@ -427,17 +427,53 @@ function formTheory(){
   uHUD();renderEvBoard();checkAch();
 }
 
+function findNpcLoc(npcId){
+  for(const k in GD){const d=GD[k];if(!d||!d.npcs)continue;for(const n of d.npcs)if(n.id===npcId){const [r,m]=k.split('_');return{reg:r,map:m,x:n.x,y:n.y};}
+  }return null;
+}
+function bfsNextConn(fromKey,goalKey){
+  const q=[[fromKey]];const vis=new Set([fromKey]);
+  while(q.length){
+    const path=q.shift();const cur=path[path.length-1];
+    if(cur===goalKey)return path;
+    const d=GD[cur];if(!d||!d.conn)continue;
+    for(const c of d.conn){
+      const nxt=c.r+'_'+c.m;
+      if(vis.has(nxt))continue;
+      vis.add(nxt);
+      q.push([...path,nxt]);
+    }
+  }return null;
+}
 function waypointTarget(m){
   const p=ST.p;if(!p||!p.fq||!m)return null;
   const active=Object.entries(p.fq).find(([,q])=>q.st==='active'&&(q.giver||q.tgt));
   if(!active)return null;
   const q=active[1];
+  const curKey=p.reg+'_'+p.map;
   if(q.giver){
     const g=(m.npcs||[]).find(n=>n.id===q.giver);
     if(g)return{x:g.x,y:g.y,txt:q.name};
+    const loc=findNpcLoc(q.giver);
+    if(loc){
+      const goalKey=loc.reg+'_'+loc.map;
+      if(loc.reg!==p.reg||loc.map!==p.map){
+        const path=bfsNextConn(curKey,goalKey);
+        if(path&&path.length>1){
+          const nxt=GD[curKey]&&GD[curKey].conn&&GD[curKey].conn.find(c=>c.r+'_'+c.m===path[1]);
+          if(nxt)return{x:nxt.x,y:nxt.y,txt:'\u2192 '+loc.reg.toUpperCase()+' '+q.name};
+        }
+      }else return{x:loc.x,y:loc.y,txt:q.name};
+    }
   }
-  if(q.tgt&&q.tgt.reg===p.reg&&q.tgt.map===p.map){
-    return{x:q.tgt.x,y:q.tgt.y,txt:q.tgt.t||q.name};
+  if(q.tgt){
+    if(q.tgt.reg===p.reg&&q.tgt.map===p.map)return{x:q.tgt.x,y:q.tgt.y,txt:q.tgt.t||q.name};
+    const goalKey=q.tgt.reg+'_'+q.tgt.map;
+    const path=bfsNextConn(curKey,goalKey);
+    if(path&&path.length>1){
+      const nxt=GD[curKey]&&GD[curKey].conn&&GD[curKey].conn.find(c=>c.r+'_'+c.m===path[1]);
+      if(nxt)return{x:nxt.x,y:nxt.y,txt:'\u2192 '+(q.tgt.t||q.name)};
+    }
   }
   return null;
 }
@@ -445,6 +481,15 @@ function waypointTarget(m){
 function drawMinimapObjective(sc,ox,oy){
   const m=getMap();
   const t=waypointTarget(m);
+  if(m&&m.conn){
+    m.conn.forEach(c=>{
+      const s=gridToScreen(c.x,c.y);
+      mmx.fillStyle='rgba(80,200,255,0.9)';
+      mmx.beginPath();mmx.arc(ox+s.x*sc,oy+s.y*sc,3,0,Math.PI*2);mmx.fill();
+      mmx.fillStyle='rgba(80,200,255,0.35)';
+      mmx.beginPath();mmx.arc(ox+s.x*sc,oy+s.y*sc,7,0,Math.PI*2);mmx.fill();
+    });
+  }
   if(!t)return;
   const blink=Math.floor(Date.now()/450)%2===0;
   mmx.fillStyle=blink?'#ffe066':'#ffaa00';

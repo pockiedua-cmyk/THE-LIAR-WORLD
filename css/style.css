@@ -1483,3 +1483,17 @@ body.txt-lg #dT{font-size:17px;line-height:1.45}
 /* day/night */
 #dayTint{position:fixed;inset:0;pointer-events:none;z-index:1;opacity:0;transition:background 1.2s,opacity 1.2s;}
 .clock{font-size:10px;color:#ffd966;margin:2px 0;letter-spacing:0.5px;}
+
+/* tutorial & HUD help */
+#tut{position:fixed;inset:0;z-index:250;background:rgba(8,4,18,0.88);display:none;align-items:center;justify-content:center;padding:20px;}
+.tut-card{max-width:520px;width:100%;background:linear-gradient(180deg,#1a1030,#0f0a22);border:1px solid #6a3fff;border-radius:10px;padding:18px 20px;box-shadow:0 0 30px rgba(106,63,255,0.35);}
+.tut-card h2{color:#ffd966;font-size:18px;margin-bottom:8px;}
+.tut-card p{color:#d0c8e8;font-size:13px;line-height:1.5;}
+.tut-card b{color:#ffe066;}
+.tut-prog{margin-top:10px;font-size:10px;color:#8a7ab8;letter-spacing:1px;}
+.hud-help{position:absolute;top:6px;right:6px;width:28px;height:28px;border-radius:50%;border:1px solid #6a3fff;background:#1a1030;color:#ffd966;font-weight:700;cursor:pointer;z-index:5;}
+.hud-help:hover{background:#2a1a4a;}
+.obj{cursor:pointer;}
+.obj-new{animation:objPulse 1.3s ease-in-out 2;background:rgba(255,224,102,0.12);border:1px solid #ffe066;border-radius:6px;}
+@keyframes objPulse{0%,100%{transform:scale(1);box-shadow:0 0 0 transparent}50%{transform:scale(1.02);box-shadow:0 0 14px rgba(255,224,102,0.45)}}
+#hud{position:relative;}
