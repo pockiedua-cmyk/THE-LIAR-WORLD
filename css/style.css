@@ -1492,7 +1492,7 @@ body.txt-lg #dT{font-size:17px;line-height:1.45}
 .tut-card p{color:#d0c8e8;font-size:13px;line-height:1.5;}
 .tut-card b{color:#ffe066;}
 .tut-prog{margin-top:10px;font-size:10px;color:#8a7ab8;letter-spacing:1px;}
-.hud-help{position:fixed;top:12px;right:12px;width:28px;height:28px;border-radius:50%;border:1px solid #6a3fff;background:#1a1030;color:#ffd966;font-weight:700;cursor:pointer;z-index:30;}
+.hud-help{position:fixed;top:18px;right:220px;width:28px;height:28px;border-radius:50%;border:1px solid #6a3fff;background:#1a1030;color:#ffd966;font-weight:700;cursor:pointer;z-index:30;}
 .hud-help:hover{background:#2a1a4a;}
 .obj{cursor:pointer;}
 .obj-new{animation:objPulse 1.3s ease-in-out 2;background:rgba(255,224,102,0.12);border:1px solid #ffe066;border-radius:6px;}
