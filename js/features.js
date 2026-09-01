@@ -8,7 +8,15 @@ const ITEM_DEFS={
   cloth_armor:{id:'cloth_armor',nm:'Cloth Armor',icon:'\u2593',desc:'Light padding. +3 DEF.',eq:'ar',df:3,price:40},
   leather_armor:{id:'leather_armor',nm:'Leather Armor',icon:'\u2592',desc:'Treated hide armor. +5 DEF.',eq:'ar',df:5,price:70},
   rarmor:{id:'rarmor',nm:'Root Armor',icon:'\u2623',desc:'Armor woven from living roots. +8 DEF.',eq:'ar',df:8,price:150},
-  frost_plate:{id:'frost_plate',nm:'Frost Plate',icon:'\u25C8',desc:'Plate rimed with protective ice. +12 DEF.',eq:'ar',df:12,price:260}
+  frost_plate:{id:'frost_plate',nm:'Frost Plate',icon:'\u25C8',desc:'Plate rimed with protective ice. +12 DEF.',eq:'ar',df:12,price:260},
+  wolf_fang:{id:'wolf_fang',nm:'Wolf Fang',icon:'\u25B2',desc:'Sharp fang. Crafting material.',price:6},
+  spider_silk:{id:'spider_silk',nm:'Spider Silk',icon:'\u2601',desc:'Silken thread. Crafting material.',price:8},
+  root_shard:{id:'root_shard',nm:'Root Shard',icon:'\u2618',desc:'Living wood fragment.',price:12},
+  crystal_shard:{id:'crystal_shard',nm:'Crystal Shard',icon:'\u25C6',desc:'Glinting crystal. Crafting material.',price:14},
+  shadow_ess:{id:'shadow_ess',nm:'Shadow Essence',icon:'\u263E',desc:'Dark essence. Crafting material.',price:18},
+  iron_scrap:{id:'iron_scrap',nm:'Iron Scrap',icon:'\u2692',desc:'Scrap iron for forging.',price:10},
+  herb_bundle:{id:'herb_bundle',nm:'Herb Bundle',icon:'\u2618',desc:'Healing herbs bundle.',price:5},
+  frost_shard:{id:'frost_shard',nm:'Frost Shard',icon:'\u2744',desc:'Shard of everfrost.',price:16}
 };
 
 const SHOPS={
@@ -39,7 +47,9 @@ const ACHDEFS=[
   {id:'scholar',ic:'\u2605',n:'Scholar',d:'Hold 10 skill ranks across your skill tree.',rw:{g:120}},
   {id:'mastery',ic:'\uD83C\uDF1F',n:'Master',d:'Max out a skill to its highest rank.',rw:{g:250}},
   {id:'bounty',ic:'\u260D',n:'Headhunter',d:'Complete your first bounty.',rw:{g:60}},
-  {id:'vanquisher',ic:'\uD83D\uDC6E',n:'Vanquisher',d:'Complete 5 bounties.',rw:{g:200}}
+  {id:'vanquisher',ic:'\uD83D\uDC6E',n:'Vanquisher',d:'Complete 5 bounties.',rw:{g:200}},
+  {id:'crafter',ic:'\u2692',n:'Crafter',d:'Craft an item at the forge.',rw:{g:40}},
+  {id:'artisan',ic:'\u2728',n:'Artisan',d:'Craft 5 items.',rw:{g:120}}
 ];
 
 function achOk(a){
@@ -65,13 +75,15 @@ function achOk(a){
   if(a.id==='mastery')return Object.values(p.ks||{}).some(v=>v>=5);
   if(a.id==='bounty')return ((p.bount&&p.bount.done)||[]).length>=1;
   if(a.id==='vanquisher')return ((p.bount&&p.bount.done)||[]).length>=5;
+  if(a.id==='crafter')return (p.stat&&p.stat.crafts||0)>=1;
+  if(a.id==='artisan')return (p.stat&&p.stat.crafts||0)>=5;
   return false;
 }
 
 function initFeats(){
   const p=ST.p;
   p.ach=p.ach||[];p.th=p.th||[];
-  p.stat=p.stat||{kills:{},battles:0,deaths:0,evPick:0,buys:0,sells:0,pots:0,theories:0,steps:0,playMs:0,lies:0,masks:0};
+  p.stat=p.stat||{kills:{},battles:0,deaths:0,evPick:0,buys:0,sells:0,pots:0,crafts:0,theories:0,steps:0,playMs:0,lies:0,masks:0};
   p.rum=p.rum||{};
   p.gear=p.gear||{wp:null,ar:null};
   p.poison=p.poison||0;

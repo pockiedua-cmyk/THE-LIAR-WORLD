@@ -1476,3 +1476,6 @@ body.no-fx #game3d{filter:none!important}
 body.txt-lg .pi{font-size:17px}
 body.txt-lg .sr{font-size:13px}
 body.txt-lg #dT{font-size:17px;line-height:1.45}
+
+/* forge */
+#cr{position:fixed;inset:0;z-index:160;background:rgba(10,5,20,0.96);display:none;overflow:auto;}
