@@ -6,6 +6,7 @@ const CORE = [
   './js/audio.js',
   './js/features.js',
   './js/rumors.js',
+  './js/combat-feel.js',
   './js/data.js',
   './js/sprites.js',
   './js/renderer3d.js',

@@ -358,6 +358,7 @@ function formTheory(){
   setF('theory_'+ids.join('_'),names.join(' + '));
   Snd.theo();
   notify('Theory formed! Insight increased.');
+  if(typeof _CF!=='undefined')_CF.journalAdd('story','Formed theory: '+names.join(' + '));
   uHUD();renderEvBoard();checkAch();
 }
 

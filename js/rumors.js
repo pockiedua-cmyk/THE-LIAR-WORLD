@@ -23,6 +23,7 @@ function addRumour(id){
   setF('rum_start_'+id);
   Snd.rum();
   notify('Rumour spread: '+R.nm);
+  if(typeof _CF!=='undefined')_CF.journalAdd('story','Spread a rumour: '+R.nm);
   uHUD();
 }
 
@@ -51,6 +52,7 @@ function sealRumour(id){
   if(r.onSeal){try{r.onSeal();}catch(e){}}
   notify('The rumour has become real: '+r.nm);
   Snd.seal();
+  if(typeof _CF!=='undefined')_CF.journalAdd('story','A rumour became reality: '+R.nm);
   if(typeof checkAch==='function')checkAch();
   uHUD();
 }

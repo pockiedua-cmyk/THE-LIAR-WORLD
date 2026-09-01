@@ -39,6 +39,7 @@ function addEv(id,title,desc,src,type){
   ST.p.sc+=5;
   ST.p.stat.evPick=(ST.p.stat.evPick||0)+1;
   Snd.evi();checkAch();
+  if(typeof _CF!=='undefined')_CF.journalAdd('world','Collected evidence: '+title);
 }
 
 function addItem(it){
@@ -155,6 +156,7 @@ function teleport(reg,map,x,y){
   R3D.buildMap(null,reg+'_'+map);
   R3D.resetCamSnap();
   if(typeof Snd!=='undefined')Snd.setRegion(reg);
+  if(!ST.p.unlocked.includes(reg)&&typeof _CF!=='undefined')_CF.journalAdd('world','Entered '+((getMap()||{}).name||reg)+'.');
   if(typeof checkAch==='function')checkAch();
   uHUD();
 }
@@ -848,6 +850,7 @@ function handleCombatFall(){
     const fee=Math.floor((ST.p.gold||0)*0.25);
     ST.p.gold=Math.max(0,(ST.p.gold||0)-fee);
     ST.p.stat.deaths=(ST.p.stat.deaths||0)+1;
+    if(typeof _CF!=='undefined')_CF.journalAdd('world','Fell in battle and survived.');
     if(ST.checkpoint)teleport(ST.checkpoint.reg,ST.checkpoint.map,ST.checkpoint.x,ST.checkpoint.y);
     notify(fee>0?('You barely survived. Lost '+fee+' gold.'):'You barely survived.');
     Snd.lose();

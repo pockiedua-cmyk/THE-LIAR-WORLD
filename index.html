@@ -88,6 +88,7 @@
 <div class="ln" id="ln">Prologue</div>
 <div class="obj" id="obj" style="display:none"></div>
 <div class="rmr" id="rmr" style="display:none">&#9889; Rumours spreading</div>
+<div class="stic-r" id="stIc"></div>
 </div>
 <div id="sp" style="display:none">
 <div class="sr"><span>ATK</span><span class="sv" id="sA">10</span></div>
@@ -98,12 +99,13 @@
 <div class="sr"><span>INS</span><span class="sv" id="sI">5</span></div>
 <div class="sr" style="border-top:1px solid #2a1a3a;margin-top:3px;padding-top:3px"><span>Weapon</span><span class="sv" id="sWp">None</span></div>
 <div class="sr"><span>Armor</span><span class="sv" id="sAr">None</span></div>
+<div class="sr" style="border-top:none"><span>Set</span><span class="sv" id="sSet" style="text-align:right"></span></div>
 <div class="sr" style="border-top:1px solid #2a1a3a;margin-top:3px;padding-top:3px"><span>Gold</span><span class="sv" id="sG">0</span></div>
 </div>
 <div id="dlg"><canvas class="dp" id="dP" width="64" height="64"></canvas><div class="dc"><div class="spk" id="dS">???</div><div class="txt" id="dT"></div><div class="cho" id="dC"></div></div></div>
 <div id="ev"><div class="eh"><h2>EVIDENCE BOARD</h2><div style="display:flex;gap:4px;align-items:center;"><button class="btn btn-sm" id="thBtn" title="Select 2 evidence cards then form a theory (gives +3 score &amp; +1 Insight)">FORM THEORY</button><button class="btn btn-sm" onclick="G.ui.closeEv()">CLOSE [V]</button></div></div><div style="padding:6px 18px;font-size:10px;color:#6a6a8a;">Click evidence cards to select. Form theories to connect the pieces.</div><div class="ec" id="evC"><div class="cl" id="evN"><h3>NPC Statements</h3></div><div class="cl" id="evP"><h3>Physical Evidence</h3></div><div class="cl" id="evD"><h3>Documents</h3></div><div class="cl" id="evT"><h3>Your Theories</h3></div></div></div>
 <div id="inv"><div class="ih"><h2>INVENTORY</h2><button class="btn btn-sm" onclick="G.ui.closeInv()">CLOSE [I]</button></div><div style="padding:8px 18px;font-size:11px;color:#6a6a8a;">Each item may hold a clue.</div><div class="ig" id="iG"></div></div>
-<div id="cm"><div class="ce"><div class="es" id="cmS"></div><div class="en" id="cmN">???</div><div class="ehb"><div class="ehf" id="cmH" style="width:100%"></div></div><div style="font-size:9px;color:#aaa" id="cmHT">HP: ???</div></div><div class="cl2" id="cmL"></div><div class="ca" id="cmA"></div></div>
+<div id="cm"><div class="ce"><div class="es" id="cmS"></div><div class="en" id="cmN">???</div><div class="cm-tl" id="cmTl"></div><div class="ehb"><div class="ehf" id="cmH" style="width:100%"></div></div><div style="font-size:9px;color:#aaa" id="cmHT">HP: ???</div></div><div class="cl2" id="cmL"></div><div class="ca" id="cmA"></div></div>
 <div id="ql"><div class="qh"><h2>QUEST JOURNAL</h2><button class="btn btn-sm" onclick="G.ui.closeQl()">CLOSE [Q]</button></div><div id="qL"></div></div>
 <div id="mn"><div class="mt">PAUSED</div><button class="btn" onclick="G.ui.closeMn()">RESUME</button><button class="btn" onclick="G.ui.closeMn();G.ui.openEv()">EVIDENCE BOARD</button><button class="btn" onclick="G.ui.closeMn();G.ui.openInv()">INVENTORY</button><button class="btn" onclick="G.ui.closeMn();G.ui.openQl()">QUEST JOURNAL</button><button class="btn" onclick="G.ui.closeMn();G.ui.openFeats()">FEATS &amp; STATS</button><button class="btn" onclick="G.ui.closeMn();G.showRanking()">RANKING</button><button class="btn" id="sndBtn" onclick="G.ui.toggleSnd()">SOUND: ON</button><button class="btn" onclick="G.ui.closeMn();G.ui.openHelp()">HOW TO PLAY</button><button class="btn" onclick="G.saveGame()">SAVE GAME</button><button class="btn btn-d" onclick="G.returnToTitle()">QUIT</button></div>
 <div id="rk"><div class="rh"><h2>GLOBAL RANKING</h2><button class="btn btn-sm" onclick="G.ui.closeRk()">CLOSE</button></div><div id="rTb" style="padding:8px 18px;display:flex;gap:4px;flex-wrap:wrap;"></div><div class="rtb" id="rT"></div></div>
@@ -402,6 +404,7 @@
 <script src="js/audio.js"></script>
 <script src="js/features.js"></script>
 <script src="js/rumors.js"></script>
+<script src="js/combat-feel.js"></script>
 <script>
 if('serviceWorker' in navigator){
   window.addEventListener('load',function(){
