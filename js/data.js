@@ -42,7 +42,7 @@ objs:[
 {id:'crest',em:'👑',x:15,y:16,nm:'Royal Crest',tp:'invest',evid:'royal_crest'},
 {id:'sign1',em:'🪧',x:11,y:12,nm:'Village Sign',tp:'sign',text:'Ashhaven - Population: Unknown'},
 {id:'chest1',em:'📦',x:21,y:17,nm:'Old Chest',tp:'chest',item:{id:'hpotion',nm:'Health Potion',icon:'❤️',desc:'Restores 30 HP'}},
-{id:'well1',em:'💧',x:12,y:14,nm:'Village Well',tp:'sign',text:'The well is deep. Something glints at the bottom.'}],
+{id:'well1',em:'💧',x:12,y:14,nm:'Village Well',tp:'sign',text:'The well is deep. Something glints at the bottom.'},{id:'board1',em:'📋',x:18,y:10,nm:'Bounty Board',tp:'board'}],
 enemies:[
 {nm:'Wounded Wolf',sp:'🐺',hp:40,at:8,df:2,sp2:6,xp:15,gld:5,atk:[{nm:'Bite',pw:10},{nm:'Lunge',pw:12}]},
 {nm:'Wild Boar',sp:'🐗',hp:55,at:12,df:5,sp2:4,xp:20,gld:8,atk:[{nm:'Charge',pw:14},{nm:'Tusks',pw:10}]}],

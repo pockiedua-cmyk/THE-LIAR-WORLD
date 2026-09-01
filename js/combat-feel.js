@@ -39,8 +39,10 @@
     const cs=ST.cs;if(!cs)return;
     const e=cs.e,p=ST.p;
     const setDef=(typeof _CF!=='undefined'?_CF.getSetBonus(p).def:0);
+    const skb=(typeof _SK!=='undefined'&&_SK.bonusOf)?_SK.bonusOf(p.ks||{}):{dmgRed:0};
     let dmg=Math.max(1,(at.pw||e.at)+Math.floor(Math.random()*4)-(cs.defending?p.def*2:p.def)/2|0)-setDef;
     if(at.mg)dmg=Math.max(1,(at.pw||e.at)+Math.floor(Math.random()*4)-p.def/3|0)-setDef;
+    if(skb.dmgRed)dmg=Math.max(1,Math.round(dmg*(1-skb.dmgRed/100)));
     if(e.stun)dmg*=e.stun;
     if(cs.falseShow)hitStop(60);
     if(dmg>=30)hitStop(40);

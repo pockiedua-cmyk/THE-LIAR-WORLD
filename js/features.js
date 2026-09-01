@@ -19,22 +19,27 @@ const SHOPS={
 };
 
 const ACHDEFS=[
-  {id:'first_blood',ic:'\u2694',n:'First Blood',d:'Win your first battle.'},
-  {id:'determined',ic:'\u2620',n:'Determined',d:'Fall in battle and survive.'},
-  {id:'curiosity',ic:'\u263C',n:'Curiosity',d:'Gather 5 pieces of evidence.'},
-  {id:'archivist',ic:'\u2630',n:'Archivist',d:'Gather 12 pieces of evidence.'},
-  {id:'lv3',ic:'\u2605',n:'Growing',d:'Reach Level 3.'},
-  {id:'lv6',ic:'\u2605',n:'Seasoned',d:'Reach Level 6.'},
-  {id:'lv10',ic:'\u2728',n:'Ascendant',d:'Reach Level 10.'},
-  {id:'boss',ic:'\u265F',n:'Region Warden',d:'Defeat a region boss.'},
-  {id:'rich',ic:'\u2632',n:'Gold Hoard',d:'Hold 300 gold at once.'},
-  {id:'theorist',ic:'\u2AF3',n:'Theorist',d:'Form 3 theories on the evidence board.'},
-  {id:'shopper',ic:'\u2699',n:'Economist',d:'Buy and sell at the merchant.'},
-  {id:'carto',ic:'\u25C8',n:'Cartographer',d:'Unlock all 7 regions.'},
-  {id:'rumormonger',ic:'\u2622',n:'Whisperer',d:'Spread your first rumour. A lie, set loose on the world.'},
-  {id:'world_shaper',ic:'\u29C9',n:'World-Shaper',d:'Let a rumour you spread transform the world around you.'},
-  {id:'maskbreaker',ic:'\u29BF',n:'Mask Breaker',d:'Shatter a boss mask and face its true form.'},
-  {id:'ending',ic:'\u2600',n:'Truth Seeker',d:'Reach any ending.'}
+  {id:'first_blood',ic:'\u2694',n:'First Blood',d:'Win your first battle.',rw:{g:25}},
+  {id:'determined',ic:'\u2620',n:'Determined',d:'Fall in battle and survive.',rw:{g:20}},
+  {id:'curiosity',ic:'\u263C',n:'Curiosity',d:'Gather 5 pieces of evidence.',rw:{g:30}},
+  {id:'archivist',ic:'\u2630',n:'Archivist',d:'Gather 12 pieces of evidence.',rw:{g:60}},
+  {id:'lv3',ic:'\u2605',n:'Growing',d:'Reach Level 3.',rw:{g:40}},
+  {id:'lv6',ic:'\u2605',n:'Seasoned',d:'Reach Level 6.',rw:{g:80}},
+  {id:'lv10',ic:'\u2728',n:'Ascendant',d:'Reach Level 10.',rw:{g:150}},
+  {id:'boss',ic:'\u265F',n:'Region Warden',d:'Defeat a region boss.',rw:{g:100}},
+  {id:'rich',ic:'\u2632',n:'Gold Hoard',d:'Hold 300 gold at once.',rw:{item:'mpotion'}},
+  {id:'theorist',ic:'\u2AF3',n:'Theorist',d:'Form 3 theories on the evidence board.',rw:{g:50}},
+  {id:'shopper',ic:'\u2699',n:'Economist',d:'Buy and sell at the merchant.',rw:{g:30}},
+  {id:'carto',ic:'\u25C8',n:'Cartographer',d:'Unlock all 7 regions.',rw:{g:200}},
+  {id:'rumormonger',ic:'\u2622',n:'Whisperer',d:'Spread your first rumour. A lie, set loose on the world.',rw:{g:30}},
+  {id:'world_shaper',ic:'\u29C9',n:'World-Shaper',d:'Let a rumour you spread transform the world around you.',rw:{g:100}},
+  {id:'maskbreaker',ic:'\u29BF',n:'Mask Breaker',d:'Shatter a boss mask and face its true form.',rw:{g:120}},
+  {id:'ending',ic:'\u2600',n:'Truth Seeker',d:'Reach any ending.',rw:{g:300,item:'frost_plate'}},
+  {id:'skilled',ic:'\u2726',n:'Student of the Veil',d:'Learn your first skill.',rw:{g:40}},
+  {id:'scholar',ic:'\u2605',n:'Scholar',d:'Hold 10 skill ranks across your skill tree.',rw:{g:120}},
+  {id:'mastery',ic:'\uD83C\uDF1F',n:'Master',d:'Max out a skill to its highest rank.',rw:{g:250}},
+  {id:'bounty',ic:'\u260D',n:'Headhunter',d:'Complete your first bounty.',rw:{g:60}},
+  {id:'vanquisher',ic:'\uD83D\uDC6E',n:'Vanquisher',d:'Complete 5 bounties.',rw:{g:200}}
 ];
 
 function achOk(a){
@@ -55,6 +60,11 @@ function achOk(a){
   if(a.id==='world_shaper')return (p.rum?Object.values(p.rum).filter(r=>r&&r.st==='sealed').length:0)>=1;
   if(a.id==='maskbreaker')return (p.stat&&p.stat.masks||0)>=1;
   if(a.id==='ending')return (p.endings&&p.endings.size||0)>=1;
+  if(a.id==='skilled')return Object.values(p.ks||{}).reduce((s,v)=>s+v,0)>=1;
+  if(a.id==='scholar')return Object.values(p.ks||{}).reduce((s,v)=>s+v,0)>=10;
+  if(a.id==='mastery')return Object.values(p.ks||{}).some(v=>v>=5);
+  if(a.id==='bounty')return ((p.bount&&p.bount.done)||[]).length>=1;
+  if(a.id==='vanquisher')return ((p.bount&&p.bount.done)||[]).length>=5;
   return false;
 }
 
@@ -65,6 +75,16 @@ function initFeats(){
   p.rum=p.rum||{};
   p.gear=p.gear||{wp:null,ar:null};
   p.poison=p.poison||0;
+  p.sp=p.sp||0;
+  p.ks=p.ks||{};
+  p._skb=p._skb||{hp:0,atk:0,def:0,mag:0,spd:0};
+  p.bount=p.bount||{active:{},done:[]};
+  p.prefs=p.prefs||{};
+  if(typeof _SK!=='undefined'&&_SK.sync)_SK.sync(p);
+  if(p.prefs){
+    document.body.classList.toggle('no-fx',!!p.prefs.flash);
+    document.body.classList.toggle('txt-lg',!!p.prefs.txt);
+  }
 }
 
 function checkAch(){
@@ -76,6 +96,10 @@ function checkAch(){
       p.ach.push(a.id);
       setF('ach_'+a.id);
       popAch(a);
+      if(a.rw){
+        if(a.rw.g){p.gold=(p.gold||0)+a.rw.g;if(typeof Snd!=='undefined'&&Snd.pickup)Snd.pickup();}
+        if(a.rw.item&&ITEM_DEFS[a.rw.item])addItem({...ITEM_DEFS[a.rw.item]});
+      }
       any=true;
     }
   });
@@ -185,7 +209,7 @@ function closeFeats(){
 
 function renderFeatTabs(cat){
   const pb=document.getElementById('ftTabs');pb.innerHTML='';
-  [{id:'ach',l:'ACHIEVEMENTS'},{id:'stats',l:'STATISTICS'},{id:'best',l:'BESTIARY'},{id:'rums',l:'RUMOURS'},{id:'jnl',l:'JOURNAL'}].forEach(t=>{
+  [{id:'ach',l:'ACHIEVEMENTS'},{id:'stats',l:'STATISTICS'},{id:'best',l:'BESTIARY'},{id:'rums',l:'RUMOURS'},{id:'jnl',l:'JOURNAL'},{id:'skills',l:'SKILLS'}].forEach(t=>{
     const b=document.createElement('button');
     b.className='btn btn-sm';if(t.id===cat)b.style.borderColor='#ffaa00';
     b.textContent=t.l;b.onclick=()=>renderFeatTabs(t.id);pb.appendChild(b);
@@ -194,7 +218,34 @@ function renderFeatTabs(cat){
   else if(cat==='stats')renderStats();
   else if(cat==='rums')renderRums();
   else if(cat==='jnl')renderFeatJournal();
+  else if(cat==='skills')renderSkills();
   else renderBest();
+}
+
+function renderSkills(){
+  if(typeof _SK!=='undefined'&&_SK.renderSkills){_SK.renderSkills();return;}
+  const b=document.getElementById('ftBody');if(!b)return;
+  b.innerHTML='';
+  if(initFeats&&ST.p)initFeats();
+  const d=document.createElement('div');d.style.cssText='padding:16px;color:#6a6a8a';d.textContent='Skill tree unavailable.';b.appendChild(d);
+}
+
+function togglePref(key){
+  if(!ST.p)return;
+  const p=ST.p;
+  p.prefs[key]=!p.prefs[key];
+  document.body.classList.toggle('no-fx',!!p.prefs.flash);
+  document.body.classList.toggle('txt-lg',!!p.prefs.txt);
+  document.querySelectorAll('#mn .btn[data-pref]').forEach(btn=>{
+    if(btn.dataset.pref===key){btn.textContent=accessLabel(key,p.prefs[key]);}
+  });
+  Snd.hud();uHUD();
+}
+
+function accessLabel(key,val){
+  if(key==='flash')return 'VISUAL CHROMA (SCREEN SHAKE): '+(val?'OFF':'ON');
+  if(key==='txt')return 'LARGE TEXT: '+(val?'ON':'OFF');
+  return key.toUpperCase()+': '+(val?'ON':'OFF');
 }
 
 function renderFeatJournal(){
@@ -396,6 +447,7 @@ UI.closeShop=function(){document.getElementById('sh').style.display='none';ST.sh
 UI.openFeats=openFeats;
 UI.closeFeats=closeFeats;
 UI.toggleSnd=function(){Snd.toggle();const b=document.getElementById('sndBtn');if(b)b.textContent='SOUND: '+(Snd.isMuted()?'OFF':'ON');return Snd.isMuted();};
+UI.togglePref=togglePref;
 
 document.addEventListener('click',e=>{
   const t=e.target;

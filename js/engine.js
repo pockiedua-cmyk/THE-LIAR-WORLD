@@ -20,7 +20,7 @@ const ISO_MOVE=[
 ];
 
 function initPlayer(){
-  return{name:'Wanderer',x:12,y:18,dir:0,hp:100,mhp:100,mp:50,mmp:50,xp:0,mxp:100,lv:1,atk:10,def:8,spd:5,mag:6,lck:3,ins:5,gold:0,reg:'pro',map:'vil',inv:[],sk:['Attack','Defend','Heal','Magic Blast'],ev:[],sc:0,se:0,ss:0,bd:[],fq:{},flags:{},dlgS:{},npcM:{},unlocked:['pro'],endings:new Set(),gear:{wp:null,ar:null},ach:[],th:[],poison:0,stat:{kills:{},battles:0,deaths:0,evPick:0,buys:0,sells:0,pots:0,theories:0,steps:0,playMs:0}};
+  return{name:'Wanderer',x:12,y:18,dir:0,hp:100,mhp:100,mp:50,mmp:50,xp:0,mxp:100,lv:1,atk:10,def:8,spd:5,mag:6,lck:3,ins:5,gold:0,reg:'pro',map:'vil',inv:[],sk:['Attack','Defend','Heal','Magic Blast'],ev:[],sc:0,se:0,ss:0,bd:[],fq:{},flags:{},dlgS:{},npcM:{},unlocked:['pro'],endings:new Set(),gear:{wp:null,ar:null},ach:[],th:[],poison:0,sp:0,ks:{},_skb:{hp:0,atk:0,def:0,mag:0,spd:0},bount:{active:{},done:[]},prefs:{},stat:{kills:{},battles:0,deaths:0,evPick:0,buys:0,sells:0,pots:0,theories:0,steps:0,playMs:0}};
 }
 
 function mp(x,y){const m=getMap();if(!m||y<0||y>=m.map.length||x<0||x>=m.map[0].length)return 3;return parseInt(m.map[y][x])||0;}
@@ -50,7 +50,9 @@ function addItem(it){
 }
 
 function gxp(amt){
-  ST.p.xp+=amt;
+  const kb=(typeof _SK!=='undefined'&&_SK.bonusOf)?_SK.bonusOf(ST.p.ks||{}):{xp:0};
+  const mult=1+(kb.xp||0)/100;
+  ST.p.xp+=Math.floor(amt*mult);
   while(ST.p.xp>=ST.p.mxp){
     ST.p.xp-=ST.p.mxp;
     ST.p.lv++;
@@ -58,7 +60,8 @@ function gxp(amt){
     ST.p.mhp+=15;ST.p.mmp+=8;
     ST.p.atk+=2;ST.p.def+=1;ST.p.spd+=1;ST.p.mag+=2;ST.p.ins+=1;
     ST.p.hp=ST.p.mhp;ST.p.mp=ST.p.mmp;
-    notify('Level Up! Now Lv.'+ST.p.lv);
+    ST.p.sp=(ST.p.sp||0)+1;
+    notify('Level Up! Now Lv.'+ST.p.lv+' (\u2295 +1 Skill Point)');
     Snd.lv();
     if(typeof lvFlash==='function')lvFlash();
   }
@@ -167,6 +170,7 @@ function transitionMap(callback){
 }
 
 function triggerShake(intensity){
+  if(ST.p&&ST.p.prefs&&ST.p.prefs.flash)return;
   ST.shakeIntensity=intensity;ST.shakeTimer=200;
 }
 
@@ -184,21 +188,26 @@ function updateCombatFx(dt){
 
 function combatFlash(){
   const c=document.getElementById('cm');
-  if(c){c.classList.remove('cfl');void c.offsetWidth;c.classList.add('cfl');}
+  if(!c)return;
+  if(ST.p&&ST.p.prefs&&ST.p.prefs.flash)return;
+  c.classList.remove('cfl');void c.offsetWidth;c.classList.add('cfl');
 }
 function enemyFlash(){
   const s=document.getElementById('cmS');
-  if(s){
-    s.style.filter='sepia(1) hue-rotate(-50deg) saturate(6) brightness(1.25)';
-    clearTimeout(s._ft);
-    s._ft=setTimeout(()=>{s.style.filter='';},260);
-  }
+  if(!s)return;
+  if(ST.p&&ST.p.prefs&&ST.p.prefs.flash)return;
+  s.style.filter='sepia(1) hue-rotate(-50deg) saturate(6) brightness(1.25)';
+  clearTimeout(s._ft);
+  s._ft=setTimeout(()=>{s.style.filter='';},260);
 }
 function playerHurtFx(){
   const el=document.getElementById('dmgV');
-  if(el){el.classList.remove('dv');void el.offsetWidth;el.classList.add('dv');}
+  if(!el)return;
+  if(ST.p&&ST.p.prefs&&ST.p.prefs.flash)return;
+  el.classList.remove('dv');void el.offsetWidth;el.classList.add('dv');
 }
 function lvFlash(){
+  if(ST.p&&ST.p.prefs&&ST.p.prefs.flash)return;
   document.body.classList.remove('lvf');void document.body.offsetWidth;
   document.body.classList.add('lvf');
   setTimeout(()=>document.body.classList.remove('lvf'),900);
@@ -487,7 +496,7 @@ openInv(){document.getElementById('inv').style.display='block';renderInv();},
 closeInv(){document.getElementById('inv').style.display='none';},
 openQl(){document.getElementById('ql').style.display='block';renderQL();},
 closeQl(){document.getElementById('ql').style.display='none';},
-openMn(){document.getElementById('mn').style.display='flex';const sb=document.getElementById('sndBtn');if(sb&&typeof Snd!=='undefined'){sb.textContent='SOUND: '+(Snd.isMuted()?'OFF':'ON');}},
+openMn(){document.getElementById('mn').style.display='flex';const sb=document.getElementById('sndBtn');if(sb&&typeof Snd!=='undefined'){sb.textContent='SOUND: '+(Snd.isMuted()?'OFF':'ON');}if(ST&&ST.p&&ST.p.prefs&&typeof accessLabel==='function'){document.querySelectorAll('#mn .btn[data-pref]').forEach(b=>{b.textContent=accessLabel(b.dataset.pref,!!ST.p.prefs[b.dataset.pref]);});}},
 closeMn(){document.getElementById('mn').style.display='none';},
 openHelp(){document.getElementById('hp').style.display='block';},
 closeHelp(){document.getElementById('hp').style.display='none';},
@@ -740,6 +749,10 @@ function interact(){
     } else if(ST.p.flags['rum_well']&&obj.id==='well1'&&(obj.tp==='well'||obj.tp==='sign')){
       openDlg('well','The villagers have come to believe the well grants wishes.',[{text:'Throw in 15 gold and wish.',onpick:function(){wishAtWell();}},{text:'Not now.',end:true}]);
     }
+    if(obj.tp==='board'&&typeof _BT!=='undefined'){
+      _BT.openBounty();
+      return;
+    }
   }
 }
 
@@ -870,9 +883,13 @@ function pAction(sk){
   let dmg=0;
     if(sk==='Attack'){
     dmg=Math.max(1,p.atk+Math.floor(Math.random()*5)-e.df/2|0)+(typeof _CF!=='undefined'?_CF.getSetBonus(p).atk:0);
+    const kb=(typeof _SK!=='undefined'&&_SK.bonusOf)?_SK.bonusOf(p.ks||{}):{cri:0,criDmg:0};
+    const cri=Math.random()*100<(kb.cri||0);
+    if(cri){dmg=Math.max(1,Math.ceil(dmg*(1+(kb.criDmg||0)/100)));cs.log.push({t:'Critical hit '+e.nm+'!',c:'hl'});}
     if(cs.falseShow){dmg=Math.ceil(dmg*2);cs.log.push({t:'Truth sears the false form! Attack x2!',c:'hl'});}
     e.curHp-=dmg;
     if(dmg>=20)hitStop(60);else hitStop(25);
+    if(cri)Snd.crit();
     cs.log.push({t:`You attack for ${dmg} damage!`,c:'dm'});
     addCombatFx('-'+dmg,'#ff6644',window.innerWidth/2+30,window.innerHeight*0.28);ST.attackFlash=200;triggerShake(4);
     enemyFlash();combatFlash();Snd.hit();
@@ -880,9 +897,13 @@ function pAction(sk){
     if(p.mp<10){cs.log.push({t:'Not enough MP!',c:'nf'});updateCombat();return;}
     p.mp-=10;
     dmg=Math.max(1,p.mag*2+Math.floor(Math.random()*8))+(typeof _CF!=='undefined'?_CF.getSetBonus(p).mag:0);
+    const kb2=(typeof _SK!=='undefined'&&_SK.bonusOf)?_SK.bonusOf(p.ks||{}):{cri:0,criDmg:0};
+    const cri2=Math.random()*100<(kb2.cri||0);
+    if(cri2){dmg=Math.max(1,Math.ceil(dmg*(1+(kb2.criDmg||0)/100)));cs.log.push({t:'Critical hit '+e.nm+'!',c:'hl'});}
     if(cs.falseShow){dmg=Math.ceil(dmg*2);cs.log.push({t:'Aura of truth! Magic Blast x2!',c:'hl'});}
     e.curHp-=dmg;
     if(dmg>=26)hitStop(70);else hitStop(30);
+    if(cri2)Snd.crit();
     cs.log.push({t:`Magic Blast hits for ${dmg}!`,c:'dm'});
     addCombatFx('-'+dmg,'#66aaff',window.innerWidth/2+30,window.innerHeight*0.28);ST.attackFlash=300;triggerShake(6);
     enemyFlash();combatFlash();Snd.cast();
@@ -940,12 +961,17 @@ function pAction(sk){
       Snd.win();
       if(typeof _CF!=='undefined')_CF.journalAdd('combat','Defeated '+e.nm+'.');
       gxp(e.xp||20);
-      if(e.gld){ST.p.gold+=e.gld;notify('+'+e.gld+' gold');}
+      if(e.gld){
+        const gb=(typeof _SK!=='undefined'&&_SK.bonusOf)?_SK.bonusOf(ST.p.ks||{}):{gold:0};
+        const add=Math.floor(e.gld*(1+(gb.gold||0)/100));
+        ST.p.gold+=add;notify('+'+add+' gold');
+      }
       if(e.pz&&Math.random()<0.12){addItem({id:'hpotion',nm:'Health Potion',icon:'\u25A6',desc:'Restores 30 HP'});}
       if(e.ev&&e.ev.id){addEv(e.ev.id,e.ev.t,e.ev.d,e.ev.s,e.ev.type||'physical');}
       if(e.boss){ST.p.bd.push(e.nm);notify('Boss Defeated: '+e.nm);}
       ST.p.bd=[...new Set(ST.p.bd||[])];
       ST.p.stat.kills[e.nm]=(ST.p.stat.kills[e.nm]||0)+1;
+      if(typeof _BT!=='undefined'&&_BT.checkBounty)_BT.checkBounty();
       if(typeof checkAch==='function')checkAch();
     },1000);
     return;

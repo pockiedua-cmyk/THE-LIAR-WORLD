@@ -1456,3 +1456,23 @@ body.lvf { animation: lvFlash 0.9s ease-out; }
   .sh-col { min-width: 100%; }
   .acg { grid-template-columns: 1fr; }
 }
+
+/* skills */
+.sk-r{display:flex;align-items:center;gap:10px;background:#16122a;border:1px solid #2a1a3a;border-radius:6px;padding:8px 10px;}
+.sk-r.sk-lock{opacity:.55;}
+.sk-t{flex:1;min-width:0;display:flex;align-items:center;gap:8px;}
+.sk-ic{font-size:18px;width:22px;text-align:center;flex:0 0 auto;}
+.sk-c{display:block;color:#6a6a8a;font-size:10px;line-height:1.2;}
+.sk-pips{display:flex;gap:3px;flex:0 0 auto;}
+.pip{width:9px;height:9px;border-radius:2px;background:#241a3a;display:inline-block;}
+.pip.on{background:#ffaa00;box-shadow:0 0 6px #ffaa00;}
+/* bounty board panel (shared look with shop/features) */
+#bt{position:fixed;inset:0;z-index:160;background:rgba(10,5,20,0.96);display:none;overflow:auto;}
+.bt-r{display:flex;align-items:center;justify-content:space-between;gap:10px;background:#16122a;border:1px solid #2a1a3a;border-radius:6px;padding:8px 10px;margin-bottom:6px;}
+/* accessibility */
+body.no-fx #cm.cfl{animation:none!important}
+body.no-fx #dmgV.dv{animation:none!important}
+body.no-fx #game3d{filter:none!important}
+body.txt-lg .pi{font-size:17px}
+body.txt-lg .sr{font-size:13px}
+body.txt-lg #dT{font-size:17px;line-height:1.45}
