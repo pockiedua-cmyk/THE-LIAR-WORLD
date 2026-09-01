@@ -485,13 +485,15 @@ DLG['merchant']=[
 {text:'Show me your wares.',next:2}]},
 {txt:'The attack? I was robbed blind! Lost everything. But between you and me... I saw who did it. It wasn\'t bandits. It was one of us.',ch:[
 {text:'A villager did this?',next:3},
-{text:'Who? Tell me!',next:4}]},
+{text:'Who? Tell me!',next:4},
+{text:'[Present] Human-Made Arrows',present:'human_arrows',next:5}]},
 {txt:'Health potions, basic gear. Nothing fancy. A village this poor doesn\'t attract quality merchants.',ch:[
 {text:'Back to the attack.',next:1},
 {text:'Actually... I heard you looted the shop before the fire.',reqev:'drunk_testimony',rum:'merchant_fire',onpick:function(){splitRum('merchant_fire');}}]},
 {txt:'I can\'t name names without proof. That\'s how people disappear around here. But check the blacksmith\'s forge - he was working late that night.',ch:[
 {text:'I\'ll check it out.',end:true,ev:'merchant_testimony'}]},
-{txt:'I said too much already. Find your own evidence, stranger. That\'s safer for both of us.',ch:[{text:'Understood.',end:true}]}];
+{txt:'I said too much already. Find your own evidence, stranger. That\'s safer for both of us.',ch:[{text:'Understood.',end:true}]},
+{txt:'Those arrows... you found the Royal Crest ones? Fine — I\'ll talk. The caravan wasn\'t merchants. Palace men in disguise.',ch:[{text:'Palace men...',end:true,ev:'merchant_arrows_confession'}]}];
 
 DLG['child']=[
 {txt:'Hi mister! You look new. Did you come from the sky too? I saw something fall from the sky before the fire!',ch:[
@@ -563,7 +565,9 @@ DLG['guard']=[
 {text:'Three places?',next:5,ev:'three_fires'}]},
 {txt:'I\'ve sworn to protect this village. I can\'t abandon it because things got dangerous.',ch:[{text:'Then help me.',end:true}]},
 {txt:'The well, the church basement, and the old oak tree. All at the same time. Whoever did this knew the village layout perfectly.',ch:[
-{text:'An insider...',end:true}]}];
+{text:'An insider...',end:true},
+{text:'[Present] Royal Crest arrows',present:'human_arrows',next:6}]},
+{txt:'Royal Crest?! Those arrows... you\'re right, they\'re not bandit make. Someone with palace access did this. Check the merchant — he had royal visitors before the fire.',ch:[{text:'Understood.',end:true,ev:'guard_confession'}]}];
 
 DLG['ghost']=[
 {txt:'... You can see me? Not many can. I am the echo of someone who died here... long ago.',ch:[
@@ -628,7 +632,7 @@ DLG['gchild']=[
 DLG['gpriest']=[
 {txt:'The Heart Seed... it was taken by the forest itself. The tree chose to retreat. I have seen this in the ancient texts.',ch:[
 {text:'That sounds convenient.',next:1},
-{text:'What ancient texts?',next:2}]},
+{text:'What ancient texts?',next:2},{text:'[Present] Empty Pedestal',present:'empty_pedestal',next:6}]},
 {txt:'I know how it sounds. But I have devoted my life to the sacred grove. The tree is alive - it has its own will.',ch:[
 {text:'So it moved itself?',next:3}]},
 {txt:'The Book of Roots. It describes how the Heart Seed responds to danger. If it sensed a threat, it would retreat underground.',ch:[
@@ -637,7 +641,8 @@ DLG['gpriest']=[
 {text:'What\'s underneath?',next:5,ev:'priest_testimony'}]},
 {txt:'Darkness. Something that was sealed long ago. Something the founders didn\'t want found.',ch:[
 {text:'Tell me more.',next:6}]},
-{txt:'I\'ve said too much. The truth... the truth is dangerous, wanderer. Be careful what you dig for.',ch:[{text:'I\'ll be careful.',end:true}]}];
+{txt:'I\'ve said too much. The truth... the truth is dangerous, wanderer. Be careful what you dig for.',ch:[{text:'I\'ll be careful.',end:true}],
+{txt:'The pedestal... you noticed it's empty and roots torn? The Heart Seed didn't move itself — I helped it. It was dying here.',ch:[{text:'Understood.',end:true,ev:'priest_pedestal_confess'}]}}];
 
 DLG['gmerch']=[
 {txt:'Looking for the Heart Seed? Join the club. Three people came by asking about it already today. Everyone wants it.',ch:[
@@ -787,18 +792,20 @@ DLG['svizier']=[
 {txt:'The Sultan and I disagreed on many things. But I didn\'t kill him. The kingdom needs stability, not chaos.',ch:[
 {text:'Who benefits most from his death?',next:3,ev:'vizier_alibi'}]},
 {txt:'The Captain of the Guard. He wanted to declare martial law. The Sultan refused. Now? The Captain has exactly what he wanted.',ch:[
-{text:'I\'ll investigate the Captain.',end:true}]}];
+{text:'I\'ll investigate the Captain.',end:true},{text:'[Present] Bloody Dagger',present:'bloody_dagger',next:4}],
+{txt:'The dagger... you found it at the crime scene? That blood isn't the Sultan's — it's the guard's. Someone else was wounded that night.',ch:[{text:'Understood.',end:true,ev:'vizier_dagger_confess'}]}}];
 
 DLG['ccapt']=[
 {txt:'Welcome aboard, landlubber. I\'m Captain Renn. This ship is going to find the legendary Leviathan. Or die trying.',ch:[
 {text:'What do you know about the Leviathan?',next:1},
 {text:'Are your crew trustworthy?',next:2}]},
 {txt:'Three stories: It sank. It flies. It IS a living creature. I believe the third. The markings I found prove it.',ch:[
-{text:'What markings?',next:3}]},
+{text:'What markings?',next:3},{text:'[Present] Ship Log',present:'ship_log',next:4}]},
 {txt:'Trustworthy? I trust them to follow orders. As for honesty... every sailor has their own truth.',ch:[
 {text:'Helpful.',end:true}]},
 {txt:'Ancient carvings on a stone tablet. They show a ship that moves on its own. With eyes. And teeth.',ch:[
-{text:'That\'s... a creature.',end:true,ev:'leviathan_evidence'}]}];
+{text:'That\'s... a creature.',end:true,ev:'leviathan_evidence'}],
+{txt:'The log... you saw the altered course? Fine — we weren't heading to port. The Captain was paid to take us to the Sky Ruins.',ch:[{text:'Understood.',end:true,ev:'capt_log_confess'}]}}];
 
 DLG['cfirst']=[
 {txt:'The Captain trusts me with his life. But I\'ll tell you something - he\'s hiding the real destination. We\'re not going where he says.',ch:[
@@ -840,10 +847,11 @@ DLG['xchild']=[
 
 DLG['xelder']=[
 {txt:'I helped build this city. When I was young. There was no magic. Just... science. The old science.',ch:[
-{text:'Tell me about the engine.',next:1}]},
+{text:'Tell me about the engine.',next:1},{text:'[Present] Gravity Stone',present:'gravity_stone',next:3}]},
 {txt:'Nobody wants to hear about engines. They prefer the magic story. The lie is more comfortable.',ch:[
 {text:'The lie about gravity?',next:2,ev:'elder_memory'}]},
-{txt:'Every great civilization is built on a lie. Ours just happens to be a physical one.',ch:[{text:'Deep.',end:true}]}];
+{txt:'Every great civilization is built on a lie. Ours just happens to be a physical one.',ch:[{text:'Deep.',end:true}],
+{txt:'The Gravity Stone... you hold it? Then you've seen the engine below. The city floats because we stole its core.',ch:[{text:'Understood.',end:true,ev:'elder_gravity_confess'}]}}];
 
 DLG['xbuilder']=[
 {txt:'I\'m the last one who remembers how it works. The engine. I can fix it... but I\'m too old. My hands shake.',ch:[

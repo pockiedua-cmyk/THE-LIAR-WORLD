@@ -620,11 +620,16 @@ function openDlg(npcId,text,choices){
       if(ch.ev&&!hasEv(ch.ev))label+=' <span class="ev-tag">[Evidence Required]</span>';
       if(ch.req&&!ST.p.flags[ch.req])label+=' <span class="ev-tag" style="color:#ff6a6a">[Locked]</span>';
       if(ch.reqev&&!hasEv(ch.reqev))label+=' <span class="ev-tag" style="color:#ff6a6a">[Locked]</span>';
+      if(ch.present){
+        if(!hasEv(ch.present))label+=' <span class="ev-tag" style="color:#ff6a6a">[Need: '+ch.present.replace(/_/g,' ')+']</span>';
+        else label+=' <span class="ev-tag" style="color:#6aff8a">[Present]</span>';
+      }
       b.innerHTML=label;
-      if((ch.ev&&!hasEv(ch.ev))||(ch.req&&!ST.p.flags[ch.req])||(ch.reqev&&!hasEv(ch.reqev)))b.classList.add('lk');
+      if((ch.ev&&!hasEv(ch.ev))||(ch.req&&!ST.p.flags[ch.req])||(ch.reqev&&!hasEv(ch.reqev))||(ch.present&&!hasEv(ch.present)))b.classList.add('lk');
       else b.onclick=()=>{
         if(ch.onpick){ch.onpick();return;}
         if(ch.ev)addEv(ch.ev,ch.ev.replace(/_/g,' '),ch.desc||'Evidence collected.',getNPCName(npcId),'npc');
+        if(ch.present&&hasEv(ch.present)){Snd.evi();if(typeof _CF!=='undefined')_CF.journalAdd('story','Presented '+ch.present.replace(/_/g,' ')+' to '+npcId);}
         if(ch.start)startQ(ch.start,ch.start.replace(/_/g,' '),'Investigate further.',ch.tgt?{tgt:ch.tgt}:null);
         if(ch.end){closeDlg();return;}
         if(ch.next!==undefined&&DLG[npcId]&&DLG[npcId][ch.next]){
