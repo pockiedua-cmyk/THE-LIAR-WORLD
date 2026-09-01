@@ -86,7 +86,7 @@ enemies:[
 {nm:'Shadow Wolf',sp:'🐺',hp:65,at:14,df:4,sp2:9,xp:25,gld:12,tw:true,atk:[{nm:'Shadow Bite',pw:16},{nm:'Howl',pw:8,mg:1}],ev:{id:'shadow_essence',t:'Shadow Wolf Essence',d:'Dark energy from the Shadow Wolf.',s:'Combat'}},
 {nm:'Forest Spider',sp:'🕷️',hp:45,at:12,df:2,sp2:11,xp:18,gld:7,pz:45,atk:[{nm:'Bite',pw:13},{nm:'Web Shot',pw:6,mg:1}]}],
 re:[{nm:'Shadow Wolf',sp:'🐺',hp:65,at:14,df:4,sp2:9,xp:25,gld:12,atk:[{nm:'Shadow Bite',pw:16}]},{nm:'Forest Spider',sp:'🕷️',hp:45,at:12,df:2,sp2:11,xp:18,gld:7,pz:45,atk:[{nm:'Bite',pw:13}]}],
-conn:[{x:20,y:23,r:'pro',m:'vil',tx:3,ty:17},{x:1,y:12,r:'r1',m:'gf',tx:38,ty:12}]};
+conn:[{x:16,y:17,r:'pro',m:'vil',tx:3,ty:17},{x:1,y:12,r:'r1',m:'gf',tx:38,ty:12}]};
 
 GD['r1_gf']={name:'Greenfall Village',map:[
 '0000000000000000000000000000000000000000',
