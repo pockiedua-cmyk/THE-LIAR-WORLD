@@ -772,7 +772,8 @@ DLG['smerch']=[
 
 DLG['sinform']=[
 {txt:'You want real information? I have it. But it costs double. The Vizier did it. That\'s what everyone whispers.',ch:[
-{text:'Is it true?',next:1}]},
+{text:'Is it true?',next:1},
+{text:'I will investigate the Sultan case.',start:'sol_justice',tgt:{reg:'r4',map:'sol',x:8,y:6,t:'Crime Scene'},end:true}]},
 {txt:'Maybe. Maybe not. The Vizier gains everything from the Sultan\'s death. But so does the Princess. And the Captain.',ch:[
 {text:'Three suspects...',end:true,ev:'three_suspects'}]},
 {txt:'Between you and me... I saw the Vizier near the study that night. But I\'ve been paid to forget. So have I.',ch:[
@@ -809,7 +810,8 @@ DLG['ccapt']=[
 
 DLG['cfirst']=[
 {txt:'The Captain trusts me with his life. But I\'ll tell you something - he\'s hiding the real destination. We\'re not going where he says.',ch:[
-{text:'Where are we really going?',next:1}]},
+{text:'Where are we really going?',next:1},
+{text:'I will hunt the Leviathan.',start:'cr_leviathan',tgt:{reg:'r5',map:'cr',x:8,y:5,t:'Ship Log'},end:true}]},
 {txt:'The Abyss. A place no ship has returned from. He has coordinates. Hidden in the star chart.',ch:[
 {text:'Why?',next:2,ev:'first_mate_secret'}]},
 {txt:'He thinks the Leviathan is his wife. She was lost at sea years ago. He\'s gone mad with grief.',ch:[
@@ -855,7 +857,8 @@ DLG['xelder']=[
 
 DLG['xbuilder']=[
 {txt:'I\'m the last one who remembers how it works. The engine. I can fix it... but I\'m too old. My hands shake.',ch:[
-{text:'Teach me.',next:1}]},
+{text:'Teach me.',next:1},
+{text:'I will repair the engine.',start:'sky_engine',tgt:{reg:'r6',map:'sky',x:7,y:7,t:'Ancient Engine'},end:true}]},
 {txt:'It needs seven Truth Shards to restart. Scattered across the floating ruins. Each one reveals a different aspect of the engine.',ch:[
 {text:'Where do I find them?',next:2,ev:'engine_repair_info'}]},
 {txt:'The Inverted Tower. That\'s where the last shard is. All floors are upside down. Only the truthful can navigate it.',ch:[
