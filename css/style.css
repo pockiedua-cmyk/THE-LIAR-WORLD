@@ -1278,6 +1278,7 @@ button:focus-visible,
   max-width: 190px;
   text-shadow: 0 1px 2px rgba(0,0,0,0.9);
   line-height: 1.4;
+  pointer-events: auto;
 }
 
 .rmr {
@@ -1491,9 +1492,9 @@ body.txt-lg #dT{font-size:17px;line-height:1.45}
 .tut-card p{color:#d0c8e8;font-size:13px;line-height:1.5;}
 .tut-card b{color:#ffe066;}
 .tut-prog{margin-top:10px;font-size:10px;color:#8a7ab8;letter-spacing:1px;}
-.hud-help{position:absolute;top:6px;right:6px;width:28px;height:28px;border-radius:50%;border:1px solid #6a3fff;background:#1a1030;color:#ffd966;font-weight:700;cursor:pointer;z-index:5;}
+.hud-help{position:fixed;top:12px;right:12px;width:28px;height:28px;border-radius:50%;border:1px solid #6a3fff;background:#1a1030;color:#ffd966;font-weight:700;cursor:pointer;z-index:30;}
 .hud-help:hover{background:#2a1a4a;}
 .obj{cursor:pointer;}
 .obj-new{animation:objPulse 1.3s ease-in-out 2;background:rgba(255,224,102,0.12);border:1px solid #ffe066;border-radius:6px;}
 @keyframes objPulse{0%,100%{transform:scale(1);box-shadow:0 0 0 transparent}50%{transform:scale(1.02);box-shadow:0 0 14px rgba(255,224,102,0.45)}}
-#hud{position:relative;}
+.hud-help{pointer-events:auto;}
