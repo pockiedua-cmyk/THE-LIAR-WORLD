@@ -644,12 +644,31 @@ function openDlg(npcId,text,choices){
   }
 }
 
+function showQuestHint(){
+  const p=ST.p;if(!p||!p.fq)return;
+  const active=Object.entries(p.fq).find(([,q])=>q.st==='active');
+  if(!active)return;
+  const [,q]=active;
+  const m=getMap();
+  const wp=typeof waypointTarget==='function'?waypointTarget(m):null;
+  if(wp&&wp.txt){
+    notify('\u27A4 '+wp.txt+' \u2014 ikut \u25C6 kuning di minimap');
+    showBanner('ARAH BARU',wp.txt);
+  }else if(q.giver){
+    notify('\u27A4 Kembali ke '+q.giver.replace(/_/g,' ')+' \u2014 buka Quest [Q]');
+    showBanner('KEMBALI KE PEMBERI MISI',q.giver.replace(/_/g,' '));
+  }else{
+    notify('\u27A4 Buka Quest [Q] untuk arah');
+  }
+  const o=document.getElementById('obj');if(o){o.classList.add('obj-new');setTimeout(()=>o.classList.remove('obj-new'),2600);}
+}
 function closeDlg(){
   ST.phase='explore';
   document.getElementById('dlg').style.display='none';
   ST.dlgNPC=null;
   if(ST._twT){clearInterval(ST._twT);ST._twT=null;}
   const pc=document.getElementById('dP');if(pc)pc.getContext('2d').clearRect(0,0,64,64);
+  setTimeout(()=>{if(typeof _DN!=='undefined')_DN.updateClock();showQuestHint();},350);
 }
 
 function getNPCName(id){

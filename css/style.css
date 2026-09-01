@@ -1504,3 +1504,6 @@ body.txt-lg #dT{font-size:17px;line-height:1.45}
 #hud .user-info .ui-name{color:#c8a0ff;font-size:10px;}
 #hud .user-info .ui-logout{color:#ff6a6a;cursor:pointer;margin-left:6px;}
 #hud .user-info .ui-logout:hover{text-decoration:underline;}
+/* HUD objective more prominent after NPC */
+#hud .obj{background:rgba(20,10,40,0.92);border:1px solid #ffe066;border-radius:6px;padding:4px 8px;font-size:11px;font-weight:700;max-width:260px;box-shadow:0 0 10px rgba(255,224,102,0.25);}
+#hud .obj:empty{display:none!important;}
