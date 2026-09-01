@@ -86,7 +86,7 @@ enemies:[
 {nm:'Shadow Wolf',sp:'🐺',hp:65,at:14,df:4,sp2:9,xp:25,gld:12,tw:true,atk:[{nm:'Shadow Bite',pw:16},{nm:'Howl',pw:8,mg:1}],ev:{id:'shadow_essence',t:'Shadow Wolf Essence',d:'Dark energy from the Shadow Wolf.',s:'Combat'}},
 {nm:'Forest Spider',sp:'🕷️',hp:45,at:12,df:2,sp2:11,xp:18,gld:7,pz:45,atk:[{nm:'Bite',pw:13},{nm:'Web Shot',pw:6,mg:1}]}],
 re:[{nm:'Shadow Wolf',sp:'🐺',hp:65,at:14,df:4,sp2:9,xp:25,gld:12,atk:[{nm:'Shadow Bite',pw:16}]},{nm:'Forest Spider',sp:'🕷️',hp:45,at:12,df:2,sp2:11,xp:18,gld:7,pz:45,atk:[{nm:'Bite',pw:13}]}],
-conn:[{x:20,y:24,r:'pro',m:'vil',tx:3,ty:17},{x:1,y:12,r:'r1',m:'gf',tx:38,ty:12}]};
+conn:[{x:20,y:23,r:'pro',m:'vil',tx:3,ty:17},{x:1,y:12,r:'r1',m:'gf',tx:38,ty:12}]};
 
 GD['r1_gf']={name:'Greenfall Village',map:[
 '0000000000000000000000000000000000000000',
@@ -130,7 +130,7 @@ enemies:[
 {nm:'Root Crawler',sp:'🐛',hp:70,at:15,df:8,sp2:5,xp:30,gld:15,tw:true,atk:[{nm:'Root Slam',pw:17}]},
 {nm:'Hollow Treant',sp:'🌲',hp:120,at:20,df:15,sp2:2,xp:50,gld:25,atk:[{nm:'Stomp',pw:22}]}],
 re:[{nm:'Root Crawler',sp:'🐛',hp:70,at:15,df:8,sp2:5,xp:30,gld:15,atk:[{nm:'Root Slam',pw:17}]}],
-conn:[{x:39,y:12,r:'pro',m:'for',tx:2,ty:12},{x:0,y:12,r:'r1',m:'gfc',tx:38,ty:12}]};
+conn:[{x:39,y:12,r:'pro',m:'for',tx:2,ty:12},{x:0,y:12,r:'r1',m:'gfc',tx:11,ty:12}]};
 
 GD['r1_gfc']={name:'Ancient Church',map:[
 '3333333333333333333333333333333333333333',
@@ -169,7 +169,7 @@ objs:[
 enemies:[
 {nm:'Root Beast',sp:'🐉',hp:200,at:25,df:12,sp2:6,xp:80,gld:50,boss:true,tw:true,ill:true,mask:6,tw2:'A tame creature bound by a lie - not the wild beast the story claimed.',atk:[{nm:'Root Eruption',pw:28},{nm:'Nature Wrath',pw:22,mg:1}],ev:{id:'heart_seed',t:'Heart Seed Fragment',d:'The true Heart Seed, hidden under the altar.',s:'Boss'}}],
 re:[],
-conn:[{x:39,y:12,r:'r1',m:'gf',tx:1,ty:12}]};
+conn:[{x:11,y:12,r:'r1',m:'gf',tx:1,ty:12}]};
 
 GD['r1_gfd']={name:'Root Caverns',map:[
 '333333333333333333333333333333',
@@ -203,7 +203,7 @@ enemies:[
 {nm:'Root Worm',sp:'🪱',hp:80,at:16,df:6,sp2:4,xp:30,gld:18,atk:[{nm:'Constrict',pw:18}]},
 {nm:'Crystal Golem',sp:'🗿',hp:150,at:22,df:20,sp2:2,xp:60,gld:35,tw:true,atk:[{nm:'Crystal Slam',pw:25}]}],
 re:[{nm:'Root Worm',sp:'🪱',hp:80,at:16,df:6,sp2:4,xp:30,gld:18,atk:[{nm:'Constrict',pw:18}]}],
-conn:[{x:14,y:19,r:'r1',m:'gfc',tx:16,ty:9}]};
+conn:[{x:12,y:19,r:'r1',m:'gfc',tx:14,ty:8}]};
 
 GD['r2_bw']={name:'Blackwood Forest',map:[
 '4444444444444444444444444444444444444444',
