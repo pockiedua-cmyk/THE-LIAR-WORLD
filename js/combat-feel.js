@@ -47,6 +47,7 @@
     if(cs.falseShow)hitStop(60);
     if(dmg>=30)hitStop(40);
     p.hp-=dmg;
+    if(p.gear&&p.gear.ar){p.gearDur.ar=Math.max(0,(p.gearDur.ar||100)-1);if(p.gearDur.ar>0&&p.gearDur.ar<=30)notify('Armor worn: '+p.gearDur.ar+'%');if(p.gearDur.ar===0)notify('Armor broke! Repair at Forge.');}
     cs.log.push({t:e.nm+' uses '+at.nm+' for '+dmg+'!',c:'dm'});
     if(cs.falseShow){
       cs.falseShow=false;

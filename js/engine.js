@@ -20,7 +20,7 @@ const ISO_MOVE=[
 ];
 
 function initPlayer(){
-  return{name:'Wanderer',x:12,y:18,dir:0,hp:100,mhp:100,mp:50,mmp:50,xp:0,mxp:100,lv:1,atk:10,def:8,spd:5,mag:6,lck:3,ins:5,gold:0,reg:'pro',map:'vil',inv:[],sk:['Attack','Defend','Heal','Magic Blast'],ev:[],sc:0,se:0,ss:0,bd:[],fq:{},flags:{},dlgS:{},npcM:{},unlocked:['pro'],endings:new Set(),gear:{wp:null,ar:null},ach:[],th:[],poison:0,sp:0,ks:{},_skb:{hp:0,atk:0,def:0,mag:0,spd:0},bount:{active:{},done:[]},prefs:{},_time:480,_day:1,stat:{kills:{},battles:0,deaths:0,evPick:0,buys:0,sells:0,pots:0,crafts:0,theories:0,steps:0,playMs:0}};
+  return{name:'Wanderer',x:12,y:18,dir:0,hp:100,mhp:100,mp:50,mmp:50,xp:0,mxp:100,lv:1,atk:10,def:8,spd:5,mag:6,lck:3,ins:5,gold:0,reg:'pro',map:'vil',inv:[],sk:['Attack','Defend','Heal','Magic Blast'],ev:[],sc:0,se:0,ss:0,bd:[],fq:{},flags:{},dlgS:{},npcM:{},unlocked:['pro'],endings:new Set(),gear:{wp:null,ar:null},gearDur:{wp:0,ar:0},ach:[],th:[],poison:0,sp:0,ks:{},_skb:{hp:0,atk:0,def:0,mag:0,spd:0},bount:{active:{},done:[]},prefs:{},_time:480,_day:1,stat:{kills:{},battles:0,deaths:0,evPick:0,buys:0,sells:0,pots:0,crafts:0,theories:0,steps:0,playMs:0}};
 }
 
 function mp(x,y){const m=getMap();if(!m||y<0||y>=m.map.length||x<0||x>=m.map[0].length)return 3;return parseInt(m.map[y][x])||0;}
@@ -86,9 +86,21 @@ function uHUD(){
   document.getElementById('sI').textContent=p.ins;
   document.getElementById('sG').textContent=p.gold;
   const gW=document.getElementById('sWp');
-  if(gW)gW.textContent=(p.gear&&p.gear.wp)?p.gear.wp.nm+' (+'+((ITEM_DEFS[p.gear.wp.id]&&ITEM_DEFS[p.gear.wp.id].wp)||0)+')':'None';
+  if(gW){
+    if(p.gear&&p.gear.wp){
+      const dur=p.gearDur&&p.gearDur.wp||100;
+      const col=dur<30?'#ff4444':dur<60?'#ffaa00':'#d0c8b0';
+      gW.innerHTML=p.gear.wp.nm+' <span style="color:'+col+'">'+dur+'%</span> (+'+((ITEM_DEFS[p.gear.wp.id]&&ITEM_DEFS[p.gear.wp.id].wp)||0)+')';
+    }else gW.textContent='None';
+  }
   const gA=document.getElementById('sAr');
-  if(gA)gA.textContent=(p.gear&&p.gear.ar)?p.gear.ar.nm+' (+'+((ITEM_DEFS[p.gear.ar.id]&&ITEM_DEFS[p.gear.ar.id].df)||0)+')':'None';
+  if(gA){
+    if(p.gear&&p.gear.ar){
+      const dur=p.gearDur&&p.gearDur.ar||100;
+      const col=dur<30?'#ff4444':dur<60?'#ffaa00':'#d0c8b0';
+      gA.innerHTML=p.gear.ar.nm+' <span style="color:'+col+'">'+dur+'%</span> (+'+((ITEM_DEFS[p.gear.ar.id]&&ITEM_DEFS[p.gear.ar.id].df)||0)+')';
+    }else gA.textContent='None';
+  }
   const sb=document.getElementById('sSet');
   if(sb){
     const setB=(typeof _CF!=='undefined'?_CF.getSetBonus(p):null);
@@ -940,6 +952,7 @@ function pAction(sk){
     cs.log.push({t:`You attack for ${dmg} damage!`,c:'dm'});
     addCombatFx('-'+dmg,'#ff6644',window.innerWidth/2+30,window.innerHeight*0.28);ST.attackFlash=200;triggerShake(4);
     enemyFlash();combatFlash();Snd.hit();
+    if(p.gear&&p.gear.wp){p.gearDur.wp=Math.max(0,(p.gearDur.wp||100)-2);if(p.gearDur.wp>0&&p.gearDur.wp<=30)notify('Weapon worn: '+p.gearDur.wp+'%');if(p.gearDur.wp===0)notify('Weapon broke! Repair at Forge (Anvil).');uHUD();}
   } else if(sk==='Magic Blast'){
     if(p.mp<10){cs.log.push({t:'Not enough MP!',c:'nf'});updateCombat();return;}
     p.mp-=10;
@@ -954,6 +967,7 @@ function pAction(sk){
     cs.log.push({t:`Magic Blast hits for ${dmg}!`,c:'dm'});
     addCombatFx('-'+dmg,'#66aaff',window.innerWidth/2+30,window.innerHeight*0.28);ST.attackFlash=300;triggerShake(6);
     enemyFlash();combatFlash();Snd.cast();
+    if(p.gear&&p.gear.wp){p.gearDur.wp=Math.max(0,(p.gearDur.wp||100)-1);if(p.gearDur.wp>0&&p.gearDur.wp<=30)notify('Weapon worn: '+p.gearDur.wp+'%');uHUD();}
   } else if(sk==='Defend'){
     cs.defending=true;
     cs.log.push({t:'You brace yourself.',c:'nf'});
@@ -1042,6 +1056,7 @@ function eTurn(){
   if(at.mg)dmg=Math.max(1,(at.pw||e.at)+Math.floor(Math.random()*4)-p.def/3|0);
   if(e.stun)dmg*=e.stun;
   p.hp-=dmg;
+  if(p.gear&&p.gear.ar){p.gearDur.ar=Math.max(0,(p.gearDur.ar||100)-1);if(p.gearDur.ar>0&&p.gearDur.ar<=30)notify('Armor worn: '+p.gearDur.ar+'%');}
   cs.log.push({t:e.nm+' uses '+at.nm+' for '+dmg+'!',c:'dm'});
   if(cs.falseShow){
     cs.falseShow=false;

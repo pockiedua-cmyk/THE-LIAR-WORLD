@@ -45,6 +45,27 @@
     if(typeof checkAch==='function')checkAch();
   }
 
+  function repair(slot){
+    if(!ST||!ST.p)return;
+    if(!ST.p.gear||!ST.p.gear[slot]){Snd.deny();notify('No gear in that slot.');return;}
+    var dur=ST.p.gearDur[slot]||0;
+    if(dur>=100){Snd.deny();notify('Already 100%');return;}
+    var need=Math.ceil((100-dur)/25);
+    var have=countMat('iron_scrap');
+    if(have<need){Snd.deny();notify('Need '+need+' Iron Scrap (have '+have+')');return;}
+    var idx=ST.p.inv.findIndex(function(x){return x.id==='iron_scrap';});
+    if(idx>=0){
+      var it=ST.p.inv[idx];
+      it.qty=(it.qty||1)-need;
+      if(it.qty<=0)ST.p.inv.splice(idx,1);
+    }
+    ST.p.gearDur[slot]=100;
+    if(typeof Snd!=='undefined'&&Snd.buy)Snd.buy();
+    notify('Repaired '+(ST.p.gear[slot].nm||slot)+' to 100%');
+    if(typeof _CF!=='undefined'&&_CF.journalAdd)_CF.journalAdd('world','Repaired '+slot);
+    if(typeof uHUD==='function')uHUD();
+    renderCraft();
+  }
   function openCraft(){
     var el=document.getElementById('cr');if(!el)return;
     el.style.display='block';
@@ -57,6 +78,22 @@
     if(!ST||!ST.p){b.innerHTML='';return;}
     if(typeof initFeats==='function')initFeats();
     b.innerHTML='';
+    var repH=document.createElement('div');repH.style.cssText='font-size:11px;color:#ffd966;margin:6px 0 4px;font-weight:700;';repH.textContent='REPAIR — Iron Scrap restores 25% per piece';b.appendChild(repH);
+    ['wp','ar'].forEach(function(slot){
+      var g=ST.p.gear[slot];if(!g){var n=document.createElement('div');n.className='bt-r';n.innerHTML='<span style="color:#6a6a8a">'+(slot==='wp'?'Weapon':'Armor')+': None</span>';b.appendChild(n);return;}
+      var dur=ST.p.gearDur[slot]||0;
+      var need=Math.ceil((100-dur)/25);
+      var have=countMat('iron_scrap');
+      var col=dur<30?'#ff4444':dur<60?'#ffaa00':'#6aff8a';
+      var row=document.createElement('div');row.className='bt-r';
+      row.innerHTML='<div><b>'+g.nm+'</b><span class="sk-c" style="color:'+col+'">'+dur+'% durability</span><span class="sk-c">'+(dur>=100?'Perfect':need+' Iron Scrap needed (have '+have+')')+'</span></div>';
+      var btn=document.createElement('button');btn.className='btn btn-sm';
+      btn.textContent=dur>=100?'OK':need+' SCRAP → REPAIR';
+      btn.disabled=dur>=100||have<need;
+      (function(s){btn.onclick=function(){repair(s);};})(slot);
+      row.appendChild(btn);b.appendChild(row);
+    });
+    var sep=document.createElement('div');sep.style.cssText='height:1px;background:#2a1a3a;margin:8px 0;';b.appendChild(sep);
     RECIPES.forEach(function(r){
       var ok=canCraft(r);
       var row=document.createElement('div');row.className='bt-r';
@@ -75,5 +112,5 @@
   }
 
   if(typeof UI!=='undefined'){UI.openCraft=openCraft;UI.closeCraft=closeCraft;}
-  window._CR={RECIPES:RECIPES,canCraft:canCraft,doCraft:doCraft,openCraft:openCraft,closeCraft:closeCraft,renderCraft:renderCraft};
+  window._CR={RECIPES:RECIPES,canCraft:canCraft,doCraft:doCraft,openCraft:openCraft,closeCraft:closeCraft,renderCraft:renderCraft,repair:repair};
 })();

@@ -94,6 +94,9 @@ function initFeats(){
   p.prefs=p.prefs||{};
   p._time=p._time==null?8*60:p._time;
   p._day=p._day==null?1:p._day;
+  p.gearDur=p.gearDur||{wp:0,ar:0};
+  if(p.gear&&p.gear.wp&&!p.gearDur.wp)p.gearDur.wp=100;
+  if(p.gear&&p.gear.ar&&!p.gearDur.ar)p.gearDur.ar=100;
   if(typeof _SK!=='undefined'&&_SK.sync)_SK.sync(p);
   if(p.prefs){
     document.body.classList.toggle('no-fx',!!p.prefs.flash);
@@ -394,6 +397,7 @@ function equipItem(idx){
   p.atk+=it.wp||0;p.def+=it.df||0;p.mag+=it.mg||0;
   if(it.qty&&it.qty>1){it.qty--;}else{p.inv.splice(idx,1);}
   p.gear[slot]={id:it.id,nm:it.nm,icon:it.icon};
+  p.gearDur[slot]=100;
   if(old){
     const od=ITEM_DEFS[old.id];
     if(od){p.atk-=od.wp||0;p.def-=od.df||0;p.mag-=od.mg||0;}
