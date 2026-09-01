@@ -18,8 +18,8 @@
   function rest(){
     if(!ST||!ST.p)return;
     initTime(ST.p);
-    if(ST.p.gold<10){Snd.deny();notify('Rest costs 10 gold at the inn.');return;}
-    ST.p.gold-=10;
+    if(ST.p.gold<15){Snd.deny();notify('Rest costs 15 gold at the inn.');return;}
+    ST.p.gold-=15;
     ST.p.hp=ST.p.mhp;ST.p.mp=ST.p.mmp;
     var h=getHour();
     var add=h<8?(8*60-ST.p._time):(32*60-ST.p._time);

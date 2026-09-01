@@ -6,8 +6,8 @@
     {id:'arc',nm:'Arcana',ic:'\u2726',d:'+2 MAG per rank.',mx:5,cost:1,req:null},
     {id:'swf',nm:'Swiftness',ic:'\u26A1',d:'+1 SPD per rank.',mx:5,cost:1,req:null},
     {id:'prc',nm:'Precision',ic:'\u25CE',d:'+3% CRIT chance per rank.',mx:5,cost:1,req:null},
-    {id:'luc',nm:'Fortune',ic:'\u2632',d:'+4% gold from combat per rank.',mx:5,cost:1,req:null},
-    {id:'wis',nm:'Wisdom',ic:'\u2605',d:'+5% XP gained per rank.',mx:5,cost:1,req:null},
+    {id:'luc',nm:'Fortune',ic:'\u2632',d:'+3% gold from combat per rank.',mx:5,cost:1,req:null},
+    {id:'wis',nm:'Wisdom',ic:'\u2605',d:'+4% XP gained per rank.',mx:5,cost:1,req:null},
     {id:'bst',nm:'Bastion',ic:'\u2620',d:'-8% damage taken per rank. Needs Vitality 3 + Guard 3.',mx:3,cost:2,req:function(ks){return (ks.vit||0)>=3&&(ks.grd||0)>=3;}},
     {id:'fry',nm:'Fury',ic:'\u2AF3',d:'+15% CRIT damage per rank. Needs Strength 3 + Precision 3.',mx:3,cost:2,req:function(ks){return (ks.str||0)>=3&&(ks.prc||0)>=3;}}
   ];
@@ -23,8 +23,8 @@
     b.mag=ranks(ks,'arc')*2;
     b.spd=ranks(ks,'swf');
     b.cri=ranks(ks,'prc')*3;
-    b.gold=ranks(ks,'luc')*4;
-    b.xp=ranks(ks,'wis')*5;
+    b.gold=ranks(ks,'luc')*3;
+    b.xp=ranks(ks,'wis')*4;
     b.dmgRed=ranks(ks,'bst')*8;
     b.criDmg=ranks(ks,'fry')*15;
     return b;

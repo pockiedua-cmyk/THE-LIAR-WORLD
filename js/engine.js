@@ -1012,8 +1012,8 @@ function pAction(sk){
       if(e.pz&&Math.random()<0.12){addItem({id:'hpotion',nm:'Health Potion',icon:'\u25A6',desc:'Restores 30 HP'});}
       var _dropMap={ 'Wounded Wolf':'wolf_fang','Wild Boar':'herb_bundle','Shadow Wolf':'wolf_fang','Forest Spider':'spider_silk','Root Worm':'root_shard','Crystal Golem':'crystal_shard','Shadow Stalker':'shadow_ess','Mist Phantom':'shadow_ess','Root Beast':'root_shard','Frost Guardian':'frost_shard','Ice Wraith':'frost_shard','Desert Scorpion':'iron_scrap','Sand Wraith':'iron_scrap' };
       var _mat=_dropMap[e.nm]||null;
-      if(_mat&&Math.random()<0.45&&ITEM_DEFS[_mat]){addItem({...ITEM_DEFS[_mat]});}
-      else if(!_mat&&Math.random()<0.20&&ITEM_DEFS['iron_scrap']){addItem({...ITEM_DEFS['iron_scrap']});}
+      if(_mat&&Math.random()<0.35&&ITEM_DEFS[_mat]){addItem({...ITEM_DEFS[_mat]});}
+      else if(!_mat&&Math.random()<0.12&&ITEM_DEFS['iron_scrap']){addItem({...ITEM_DEFS['iron_scrap']});}
       if(e.ev&&e.ev.id){addEv(e.ev.id,e.ev.t,e.ev.d,e.ev.s,e.ev.type||'physical');}
       if(e.boss){ST.p.bd.push(e.nm);notify('Boss Defeated: '+e.nm);}
       ST.p.bd=[...new Set(ST.p.bd||[])];
