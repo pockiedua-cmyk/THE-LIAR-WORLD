@@ -20,7 +20,7 @@ const ISO_MOVE=[
 ];
 
 function initPlayer(){
-  return{name:'Wanderer',x:12,y:18,dir:0,hp:100,mhp:100,mp:50,mmp:50,xp:0,mxp:100,lv:1,atk:10,def:8,spd:5,mag:6,lck:3,ins:5,gold:0,reg:'pro',map:'vil',inv:[],sk:['Attack','Defend','Heal','Magic Blast'],ev:[],sc:0,se:0,ss:0,bd:[],fq:{},flags:{},dlgS:{},npcM:{},unlocked:['pro'],endings:new Set(),gear:{wp:null,ar:null},ach:[],th:[],poison:0,sp:0,ks:{},_skb:{hp:0,atk:0,def:0,mag:0,spd:0},bount:{active:{},done:[]},prefs:{},stat:{kills:{},battles:0,deaths:0,evPick:0,buys:0,sells:0,pots:0,theories:0,steps:0,playMs:0}};
+  return{name:'Wanderer',x:12,y:18,dir:0,hp:100,mhp:100,mp:50,mmp:50,xp:0,mxp:100,lv:1,atk:10,def:8,spd:5,mag:6,lck:3,ins:5,gold:0,reg:'pro',map:'vil',inv:[],sk:['Attack','Defend','Heal','Magic Blast'],ev:[],sc:0,se:0,ss:0,bd:[],fq:{},flags:{},dlgS:{},npcM:{},unlocked:['pro'],endings:new Set(),gear:{wp:null,ar:null},ach:[],th:[],poison:0,sp:0,ks:{},_skb:{hp:0,atk:0,def:0,mag:0,spd:0},bount:{active:{},done:[]},prefs:{},_time:480,_day:1,stat:{kills:{},battles:0,deaths:0,evPick:0,buys:0,sells:0,pots:0,crafts:0,theories:0,steps:0,playMs:0}};
 }
 
 function mp(x,y){const m=getMap();if(!m||y<0||y>=m.map.length||x<0||x>=m.map[0].length)return 3;return parseInt(m.map[y][x])||0;}
@@ -117,6 +117,7 @@ function uHUD(){
       rmr.style.display='block';
     }else rmr.style.display='none';
   }
+  if(typeof _DN!=='undefined'){_DN.updateClock();_DN.updateTint();}
 }
 
 function notify(t){
@@ -757,11 +758,18 @@ function interact(){
       _CR.openCraft();
       return;
     }
+    if(obj.tp==='inn'&&typeof _DN!=='undefined'){
+      _DN.rest();
+      return;
+    }
   }
 }
 
 function startCombat(enemy){
   ST.phase='combat';
+  if(typeof _DN!=='undefined'&&_DN.isNight()){
+    enemy={...enemy,at:Math.ceil(enemy.at*1.15),hp:Math.ceil(enemy.hp*1.10)};
+  }
   const e={...enemy,curHp:enemy.hp,pois:(enemy.pz||0)};
   ST.cs={e,log:[],pTurn:ST.p.spd>=e.sp2,defending:false,turns:0,falseShow:false};
   if(e.boss&&e.ill&&e.tw){ST.cs.masked=true;}
@@ -1171,8 +1179,9 @@ function update(){
         });
         if(typeof checkAch==='function')checkAch();
       }
-      if(!ST.p.stat)ST.p.stat={kills:{},battles:0,deaths:0,evPick:0,buys:0,sells:0,pots:0,theories:0,steps:0,playMs:0};
+      if(!ST.p.stat)ST.p.stat={kills:{},battles:0,deaths:0,evPick:0,buys:0,sells:0,pots:0,crafts:0,theories:0,steps:0,playMs:0};
       ST.p.stat.steps=(ST.p.stat.steps||0)+1;
+      if(typeof _DN!=='undefined'&&_DN.advance)_DN.advance(2);
       if(Math.random()<0.08&&p.lv>1){
         const m=getMap();
         if(m&&m.re&&m.re.length){
@@ -1293,10 +1302,11 @@ function gameLoop(ts){
   updateCombatFx(ST.dt);
   if(ST.cs&&typeof _CF!=='undefined')_CF.updateStatusIcons();
   if(ST.phase==='explore'&&ST.p){
-    if(!ST.p.stat)ST.p.stat={kills:{},battles:0,deaths:0,evPick:0,buys:0,sells:0,pots:0,theories:0,steps:0,playMs:0};
+    if(!ST.p.stat)ST.p.stat={kills:{},battles:0,deaths:0,evPick:0,buys:0,sells:0,pots:0,crafts:0,theories:0,steps:0,playMs:0};
     ST.p.stat.playMs=(ST.p.stat.playMs||0)+ST.dt;
     ST._achT=(ST._achT||0)+ST.dt;
     if(ST._achT>2000){ST._achT=0;if(typeof checkAch==='function')checkAch();if(typeof rumourTick==='function')rumourTick(1);}
+    if(typeof _DN!=='undefined'&&_DN.tick)_DN.tick(ST.dt);
   }
   update();
   render();

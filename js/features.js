@@ -92,6 +92,8 @@ function initFeats(){
   p._skb=p._skb||{hp:0,atk:0,def:0,mag:0,spd:0};
   p.bount=p.bount||{active:{},done:[]};
   p.prefs=p.prefs||{};
+  p._time=p._time==null?8*60:p._time;
+  p._day=p._day==null?1:p._day;
   if(typeof _SK!=='undefined'&&_SK.sync)_SK.sync(p);
   if(p.prefs){
     document.body.classList.toggle('no-fx',!!p.prefs.flash);

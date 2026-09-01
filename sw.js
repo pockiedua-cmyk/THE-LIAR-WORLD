@@ -10,6 +10,7 @@ const CORE = [
   './js/skills.js',
   './js/bounties.js',
   './js/craft.js',
+  './js/daynight.js',
   './js/data.js',
   './js/sprites.js',
   './js/renderer3d.js',

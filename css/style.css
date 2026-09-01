@@ -1479,3 +1479,7 @@ body.txt-lg #dT{font-size:17px;line-height:1.45}
 
 /* forge */
 #cr{position:fixed;inset:0;z-index:160;background:rgba(10,5,20,0.96);display:none;overflow:auto;}
+
+/* day/night */
+#dayTint{position:fixed;inset:0;pointer-events:none;z-index:1;opacity:0;transition:background 1.2s,opacity 1.2s;}
+.clock{font-size:10px;color:#ffd966;margin:2px 0;letter-spacing:0.5px;}
