@@ -702,7 +702,11 @@ function interact(){
     }
     return;
   }
-  const obj=getObj(nx,ny);
+  let obj=getObj(nx,ny);
+  if(!obj&&ST.nearestObj){
+    const d=Math.abs(ST.nearestObj.x-ST.p.x)+Math.abs(ST.nearestObj.y-ST.p.y);
+    if(d<=2) obj=ST.nearestObj;
+  }
   if(obj){
     if(obj.tp==='invest'&&obj.evid){
       const evData={
@@ -772,17 +776,17 @@ function interact(){
     } else if(ST.p.flags['rum_well']&&obj.id==='well1'&&(obj.tp==='well'||obj.tp==='sign')){
       openDlg('well','The villagers have come to believe the well grants wishes.',[{text:'Throw in 15 gold and wish.',onpick:function(){wishAtWell();}},{text:'Not now.',end:true}]);
     }
-    if(obj.tp==='board'&&typeof _BT!=='undefined'){
-      _BT.openBounty();
-      return;
+    if(obj.tp==='board'){
+      if(typeof _BT!=='undefined'&&_BT.openBounty){_BT.openBounty();return;}
+      notify('Bounty Board — please hard refresh (Ctrl+F5)');return;
     }
-    if(obj.tp==='anvil'&&typeof _CR!=='undefined'){
-      _CR.openCraft();
-      return;
+    if(obj.tp==='anvil'){
+      if(typeof _CR!=='undefined'&&_CR.openCraft){_CR.openCraft();return;}
+      notify('Anvil — please hard refresh (Ctrl+F5)');return;
     }
-    if(obj.tp==='inn'&&typeof _DN!=='undefined'){
-      _DN.rest();
-      return;
+    if(obj.tp==='inn'){
+      if(typeof _DN!=='undefined'&&_DN.rest){_DN.rest();return;}
+      notify('Inn — please hard refresh (Ctrl+F5)');return;
     }
   }
 }
@@ -1237,7 +1241,7 @@ function update(){
 }
 
 function isPanelOpen(){
-  return ['mn','ev','inv','ql','rk','hp','sh','ft'].some(id=>{
+  return ['mn','ev','inv','ql','rk','hp','sh','ft','bt','cr','tut'].some(id=>{
     const el=document.getElementById(id);
     return el&&(el.style.display==='flex'||el.style.display==='block');
   });
@@ -1260,6 +1264,9 @@ document.addEventListener('keydown',e=>{
     else if(document.getElementById('inv').style.display==='block')UI.closeInv();
     else if(document.getElementById('ql').style.display==='block')UI.closeQl();
     else if(document.getElementById('hp').style.display==='block')UI.closeHelp();
+    else if(document.getElementById('bt').style.display==='block')UI.closeBounty();
+    else if(document.getElementById('cr').style.display==='block')UI.closeCraft();
+    else if(document.getElementById('tut').style.display==='flex')Tut.close();
     else if(document.getElementById('mn').style.display==='flex')UI.closeMn();
     else if(ST.phase==='explore')UI.openMn();
   }
