@@ -166,12 +166,37 @@ function completeQ(id){if(ST.p.fq[id]){ST.p.fq[id].st='done';notify('✓ Selesai
 function failQ(id){if(ST.p.fq[id])ST.p.fq[id].st='failed';}
 
 function teleport(reg,map,x,y){
+  const key=reg+'_'+map;
+  if(!GD[key]){console.error('teleport missing map',key);notify('Map error: '+key);return;}
+  const tm=GD[key].map;
+  function isWalkable(tx,ty){
+    if(ty<0||ty>=tm.length||tx<0||tx>=tm[0].length)return false;
+    const t=parseInt(tm[ty][tx])||0;
+    const SOL_TL=new Set([3,4,6,14,15,17,30,31,32,35]);
+    if(SOL_TL.has(t))return false;
+    if((GD[key].npcs||[]).some(n=>n.x===tx&&n.y===ty))return false;
+    return true;
+  }
+  let nx=x,ny=y;
+  if(!isWalkable(nx,ny)){
+    let found=false;
+    for(let r=1;r<=3&&!found;r++){
+      for(let dy=-r;dy<=r&&!found;dy++){
+        for(let dx=-r;dx<=r&&!found;dx++){
+          if(Math.abs(dx)+Math.abs(dy)>r)continue;
+          const tx=x+dx,ty=y+dy;
+          if(isWalkable(tx,ty)){nx=tx;ny=ty;found=true;}
+        }
+      }
+    }
+    if(found){nx=nx;ny=ny;x=nx;y=ny;notify('Adjusted spawn to walkable tile.');}
+  }
   ST.p.reg=reg;ST.p.map=map;ST.p.x=x;ST.p.y=y;
   ST.renderPX=x;ST.renderPY=y;
   ST.checkpoint={reg:reg,map:map,x:x,y:y};
   ST.p.poison=0;
   R3D.setRegion(reg);
-  R3D.buildMap(null,reg+'_'+map);
+  try{R3D.buildMap(null,key);}catch(e){console.error('buildMap failed',key,e);notify('Map load error');}
   R3D.resetCamSnap();
   if(typeof Snd!=='undefined')Snd.setRegion(reg);
   if(!ST.p.unlocked.includes(reg)&&typeof _CF!=='undefined')_CF.journalAdd('world','Entered '+((getMap()||{}).name||reg)+'.');
