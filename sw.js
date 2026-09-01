@@ -1,4 +1,4 @@
-const CACHE = 'veil-of-lies-v22';
+const CACHE = 'veil-of-lies-v23';
 const CORE = [
   './index.html',
   './css/style.css',
@@ -47,13 +47,15 @@ self.addEventListener('fetch', (e) => {
   e.respondWith(
     caches.match(e.request).then((hit) => {
       if (hit) return hit;
-      return fetch(e.request).then((res) => {
-        if (res.ok || res.type === 'opaque') {
-          const copy = res.clone();
-          caches.open(CACHE).then((c) => c.put(e.request, copy));
-        }
-        return res;
-      });
+      return fetch(e.request)
+        .then((res) => {
+          if (res.ok || res.type === 'opaque') {
+            const copy = res.clone();
+            caches.open(CACHE).then((c) => c.put(e.request, copy));
+          }
+          return res;
+        })
+        .catch(() => caches.match(e.request));
     })
   );
 });

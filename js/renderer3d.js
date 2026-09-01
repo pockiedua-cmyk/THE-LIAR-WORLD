@@ -1134,8 +1134,8 @@ const R3D=(function(){
       const board=new THREE.Mesh(new THREE.BoxGeometry(0.48,0.38,0.03),new THREE.MeshStandardMaterial({color:lightWood,roughness:0.6}));
       board.position.set(0,0.32,0.02);g.add(board);
       for(let i=0;i<3;i++){
-        const paper=new THREE.Mesh(new THREE.PlaneGeometry(0.1,0.13),new THREE.MeshStandardMaterial({color:paper,side:THREE.DoubleSide}));
-        paper.position.set((i-1)*0.13,0.32,0.045);paper.rotation.y=0.02;g.add(paper);
+        const sheet=new THREE.Mesh(new THREE.PlaneGeometry(0.1,0.13),new THREE.MeshStandardMaterial({color:paper,side:THREE.DoubleSide}));
+        sheet.position.set((i-1)*0.13,0.32,0.045);sheet.rotation.y=0.02;g.add(sheet);
         const pin=new THREE.Mesh(new THREE.SphereGeometry(0.008,4,4),new THREE.MeshStandardMaterial({color:0xcc2222}));
         pin.position.set((i-1)*0.13,0.38,0.05);g.add(pin);
       }
